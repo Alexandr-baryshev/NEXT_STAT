@@ -46,12 +46,11 @@ select ce.TIME_REG                                                              
                  arm03_call.PATIENT_MIDDLENAME, to_char(patient.birthday, 'DD-MM-YYYY'))               as string_key,
 
        CASE
-         WHEN to_timestamp('$params.get("Дата начала")', 'DD.MM.YYYY HH24:MI:SS') > ce.TIME_REG THEN '1' --!!
-       --!! WHEN TIMESTAMP '2021-08-19 00:00:00' > ce.TIME_REG THEN '1' --!!
+        -- WHEN to_timestamp('$params.get("Дата начала")', 'DD.MM.YYYY HH24:MI:SS') > ce.TIME_REG THEN '1' --!!
+        WHEN TIMESTAMP '2022-02-02 00:00:00' > ce.TIME_REG THEN '1' --!!
          ELSE NULL END                                                                                 as вчера
 
 from CALL_EVENT ce
-       LEFT JOIN REF_CALL_EVENT_SOUND ref_call_event_sound on ce.id = ref_call_event_sound.ID_CALL_EVENT
        LEFT JOIN ARM03_PATIENT_ASSISTANCE apa on ce.ID = apa.ID
        LEFT JOIN ARM03_PATIENT_OBJECTIVE_DATA apod on apa.id = apod.id
        LEFT JOIN ARM03_PATIENT_INSTR_STUDY_DATA isdB on apod.id_instr_data_before = isdB.id
@@ -72,40 +71,49 @@ from CALL_EVENT ce
        LEFT JOIN CALL_NAME ct_brigade_cn
                  on ct_brigade.ID = ct_brigade_cn.ID_TBL AND ct_brigade_cn.TABLE_NAME = 'TECHNIKA'
        LEFT JOIN ARM03_PATIENT patient on arm03_call.id_patient = patient.id
+       LEFT JOIN REF_CALL_EVENT_SOUND ref_call_event_sound on ce.id = ref_call_event_sound.ID_CALL_EVENT
+
 
 where (
-          ce.TIME_REG BETWEEN --!!
-              to_timestamp('$params.get("Дата начала")', 'DD.MM.YYYY HH24:MI:SS') - interval '1' DAY AND --!!
-              to_timestamp('$params.get("Дата окончания")', 'DD.MM.YYYY HH24:MI:SS') --!!
+          ce.TIME_REG BETWEEN  --!!
+         -- to_timestamp('$params.get("Дата начала")', 'DD.MM.YYYY HH24:MI:SS') - interval '1' DAY AND  --!!
+         -- to_timestamp('$params.get("Дата окончания")', 'DD.MM.YYYY HH24:MI:SS')  --!!
+          TIMESTAMP '2022-02-02 00:00:00' - interval '1' DAY AND TIMESTAMP '2022-02-25 00:00:00' --!!
 
-            --!! ce.TIME_REG BETWEEN TIMESTAMP '2021-08-19 00:00:00' - interval '1' DAY AND TIMESTAMP '2021-08-20 00:00:00' --!!
+          AND ((ce.id_src_type is null OR NOT (ce.id_src_type IN (8, 9))) AND
+               (ce.WRONG_CALL is null OR ce.WRONG_CALL = 0) AND
+               (arm03_call.YEARS >= 18) AND
+               (apa.ID_ACT_CALL_HOSPITAL IN (216, 126, 212, 95, 115, 119, 118, 116, 114, 5, 3, 4, 2)))
 
-              # if($params.get("Подразделение") && !$params.get("Подразделение").isEmpty() )
-          AND vw_sc_repair_id_pult.id_pult IN ($params.get("Подразделение"))
-            #end
 
-          AND patient.birthday IS NOT NULL
-          AND NOT (rcs_staff.ID_APPOINTMENT IN (2, 3))
-          AND concat_ws(' ', arm03_call.PATIENT, arm03_call.PATIENT_FIRSTNAME, arm03_call.PATIENT_MIDDLENAME,
-                        to_char(patient.birthday, 'DD-MM-YYYY')) IN (select concat_ws(' ', arm03_call.PATIENT,
-                                                                                      arm03_call.PATIENT_FIRSTNAME,
-                                                                                      arm03_call.PATIENT_MIDDLENAME,
-                                                                                      to_char(patient.birthday, 'DD-MM-YYYY'))
 
-                                                                     from CALL_EVENT ce
-                                                                            LEFT JOIN ARM03_PATIENT_ASSISTANCE apa on ce.ID = apa.ID
-                                                                            LEFT JOIN ARM03_CALL arm03_call on apa.ID = arm03_call.ID_CALL
-                                                                            LEFT JOIN ARM03_PATIENT patient on arm03_call.id_patient = patient.id
+         -- #if ( $params.get("Подразделение") && !$params.get("Подразделение").isEmpty() )
+         --   AND vw_sc_repair_id_pult.id_pult IN ($params.get("Подразделение"))
+         -- #end
 
-                                                                     where (
-                                                                        ce.TIME_REG BETWEEN  --!!
-                                                                        to_timestamp('$params.get("Дата начала")', 'DD.MM.YYYY HH24:MI:SS') AND  --!!
-                                                                        to_timestamp('$params.get("Дата окончания")', 'DD.MM.YYYY HH24:MI:SS')  --!!
+          --AND patient.birthday IS NOT NULL
+          --AND NOT (rcs_staff.ID_APPOINTMENT IN (2, 3))
 
-                                                                       --!! ce.TIME_REG BETWEEN TIMESTAMP '2021-08-19 00:00:00' AND TIMESTAMP '2021-08-20 00:00:00' --!!
-
-                                                                             )
-              )
+--          AND concat_ws(' ', arm03_call.PATIENT, arm03_call.PATIENT_FIRSTNAME, arm03_call.PATIENT_MIDDLENAME,
+--                        to_char(patient.birthday, 'DD-MM-YYYY')) IN (select concat_ws(' ', arm03_call.PATIENT,
+--                                                                                      arm03_call.PATIENT_FIRSTNAME,
+--                                                                                      arm03_call.PATIENT_MIDDLENAME,
+--                                                                                      to_char(patient.birthday, 'DD-MM-YYYY'))
+--
+--                                                                     from CALL_EVENT ce
+--                                                                            LEFT JOIN ARM03_PATIENT_ASSISTANCE apa on ce.ID = apa.ID
+--                                                                            LEFT JOIN ARM03_CALL arm03_call on apa.ID = arm03_call.ID_CALL
+--                                                                            LEFT JOIN ARM03_PATIENT patient on arm03_call.id_patient = patient.id
+--
+--                                                                     where (
+--                                                                        ce.TIME_REG BETWEEN  --!!
+--                                                                        to_timestamp('$params.get("Дата начала")', 'DD.MM.YYYY HH24:MI:SS') AND  --!!
+--                                                                        to_timestamp('$params.get("Дата окончания")', 'DD.MM.YYYY HH24:MI:SS')  --!!
+--
+--                                                                       --!! ce.TIME_REG BETWEEN TIMESTAMP '2021-08-19 00:00:00' AND TIMESTAMP '2021-08-20 00:00:00' --!!
+--
+--                                                                             )
+--              )
         )
 
 GROUP BY время_регистрации, idcall, активный_вызов_в_лпу, аон, дата_рождения, заявитель, место_работы, расшифровка_од,
