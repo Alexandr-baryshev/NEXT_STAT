@@ -1,0 +1,8 @@
+{
+   "tag" : "Уссурийск",
+   "host": "172.26.6.2",
+   "user": "postgres",
+   "pass": "postgres",
+   "db": "postgres_03"
+}
+

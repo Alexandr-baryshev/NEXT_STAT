@@ -1,0 +1,8 @@
+{
+   "tag" : "Находка",
+   "host": "172.26.6.2",
+   "user": "postgres",
+   "pass": "28N$XTpgdb",
+   "db": "postgres_03"
+}
+

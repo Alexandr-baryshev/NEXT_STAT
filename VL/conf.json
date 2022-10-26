@@ -1,0 +1,8 @@
+{
+   "tag" : "Владивосток",
+   "host": "172.26.22.3",
+   "user": "postgres",
+   "pass": "postgres",
+   "db": "isiok_main"
+}
+
