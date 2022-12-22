@@ -1,0 +1,1620 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<level2 xmlns="ru.next.schema.lvl2"
+        xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+        xsi:schemaLocation="ru.next.schema.lvl2 level2.xsd ru.next.schema.db.oracle oracle.xsd">
+
+    <meta>
+        <caption>Схема по вызовам</caption>
+        <description></description>
+        <uuid>462b682e-f7f8-419f-b5b6-760e71830606</uuid>
+        <version>12</version>
+    </meta>
+
+    <entity id="id_card" caption="Карточка происшествия" defMap="ce">
+        <entity id="id_ce_ID" caption="Идентификатор происшествия" column="id" type="number"/>
+        <entity id="id_ce_TIME_REG" caption="Время регистрации" column="TIME_REG" type="dateTime"/>
+        <entity id="id_ce_get_call" caption="Время приема вызова" column="dtime" defMap="vw_sc_get_call" type="dateTime"/>
+        <entity id="id_ce_REG_NO" caption="Регистрационный номер" column="REG_NO" type="number"/>
+        <entity id="id_ce_IS_REP" caption="Признак повторного звонка" expression="
+                   CASE(0, WHEN(IS_NOT_NULL(ce.id_main_call), 1))" type="boolean"/>
+        <entity id="id_ce_main_call" caption="Идентификатор основного вызова" column="id_main_call" type="number"/>
+        <entity id="id_ce_IS_ACTIVE" caption="Признак активности" column="IS_ACTIVE" type="boolean"/>
+        <entity id="id_ce_WRONG" caption="Признак ложного вызова" column="WRONG" type="boolean"/>
+        <entity id="id_ce_RETREATED" caption="Признак завершения происшествия" column="RETREATED" type="boolean"/>
+        <entity id="id_ce_RETREAT_TIME" caption="Время завершения" column="RETREAT_TIME" type="dateTime"/>
+        <entity id="id_ce_EV_CODE" caption="Код события по системе мониторинга" column="EV_CODE" type="text"/>
+        <entity id="id_ce_FINISHED" caption="Закончено" column="finished" type="boolean"/>
+        <entity id="id_ce_WRONG_CALL" caption="Признак ложного звонка" column="WRONG_CALL" type="boolean"/>
+        <entity id="uci_is_emerg" caption="Признак ЧС" defMap="unified_call_info" column="is_emergency" type="boolean"/>
+        <entity id="id_ce_VICTIM_COUNT" caption="Количество пострадавших" column="victim_count" type="number"/>
+        <entity id="id_ce_CALL_NUMB" caption="Номер вызова" column="call_numb" type="number"/>
+        <entity id="id_ce_IS_REPEATED" caption="Признак повторного вызова" column="is_repeated" type="boolean"/>
+        <entity id="id_ce_RETREAT_REASON"
+                caption="Причина завершения происшествия (результат) текст" column="retreat_reason" type="text"/>
+        <entity id="id_ce_RETREAT_REASON_di"
+                caption="Причина завершения происшествия (результат) справочник" defMap="ce_rere" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_ce_rere" defMap="ce_rere" column="id" refDictionaryColumn="dic_ce_rere_id"/>
+        </entity>
+        <entity id="id_ce_EVENT_TEXT" caption="Содержание текста происшествия" column="EVENT_TEXT" type="text"/>
+        <entity id="id_ce_AT_CONTROL"
+                caption="Признак, что происшествие поставлено на контроль" column="at_control" type="boolean"/>
+        <entity id="id_ce_CONTROL_DTIME"
+                caption="Время постановки происшествия на контроль" column="control_dtime" type="dateTime"/>
+
+        <entity id="id_ce_IS_FIRST_CALL" defMap="vw_sc_for_first_call_sign" column="is_first_call" type="boolean"
+                caption="Признак первичного вызова"/>
+        <entity id="id_ce_IS_CONTINIOUS" defMap="vw_sc_for_follow_and_cont_sign" column="is_continious" type="boolean"
+                caption="Признак продолжения вызова"/>
+        <entity id="id_ce_IS_PASSING_CALL" defMap="vw_sc_for_follow_and_cont_sign" column="is_following" type="boolean"
+                caption="Признак попутного вызова"/>
+        <entity id="id_ce_IS_LINKED_EVENT" defMap="vw_sc_for_linked_sign" column="is_linked_event" type="boolean"
+                caption="Признак связанного вызова"/>
+
+        <entity id="id_ce_ID_SRC_TYPE" caption="Источник информации происшествия" defMap="src_et" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_src_et" defMap="ce" column="id_src_type" refDictionaryColumn="dic_src_et_id"/>
+            <entity id="id_ce_IS_LINKED_EVENT_text" caption="Текст" column="caption" type="text"/>
+            <entity id="id_ce_IS_LINKED_EVENT_cod" caption="Код" column="id" type="number"/>
+        </entity>
+        <entity id="id_ce_RANK" caption="Тип происшествия" defMap="rank" column="caption" type="dictionary">
+            <dictionary ref="dic_rank" defMap="ce" column="id_rank" refDictionaryColumn="dic_rank_id"/>
+            <entity id="id_ce_RANK_text" caption="Тип происшествия" column="caption" type="text"/>
+            <entity id="id_ce_RANK_DESCRIPTION" caption="Описание" column="description" type="text"/>
+            <entity id="id_ce_RANK_PRIORITET" caption="Приоритет" column="PRIORITET" type="number"/>
+        </entity>
+        <entity id="id_ce_Event" caption="Вид происшествия" defMap="event_type" column="caption" type="dictionary">
+            <dictionary ref="dic_event_type" defMap="ce" column="id_event_type"
+                        refDictionaryColumn="dic_event_type_id"/>
+            <entity id="id_ce_EVENT_TYPE_text" caption="Вид происшествия" column="caption" type="text"/>
+            <entity id="id_ce_Event_FOR_AUTO" caption="Используется ли в 'Мониторинге'"/>
+            <entity id="id_ce_Event_IS_EMERGENCY" caption="Приaaзнак ЧС"/>
+            <entity id="id_ce_Event_HANDLE" caption="Вид обработки"/>
+            <entity id="id_ce_Event_SYSTEM" caption="Системная группа"/>
+        </entity>
+
+        <entity id="pult_take_call_d" caption="Подразделение" defMap="pult_take_call" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_pult_take_call" defMap="vw_sc_repair_id_pult" column="id_pult"
+                        refDictionaryColumn="dic_pult_take_call_id"/>
+        </entity>
+        <entity id="pult_own_call_d" caption="Служба" defMap="pult_own_call" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_pult_remoute" defMap="vw_sc_repair_own_pult" column="id_own_pult"
+                        refDictionaryColumn="dic_pult_remoute_id"/>
+        </entity>
+        <entity id="ce_ref_main_id_card" caption="Основной вызов" defMap="ce_ref_main">
+            <entity id="ce_ref_ID" caption="Идентификатор основного вызова" column="id" type="number"/>
+            <entity id="ce_ref_TIME_REG" caption="Время регистрации основного вызова" column="TIME_REG"
+                    type="dateTime"/>
+            <entity id="ce_ref_REG_NO" caption="Регистрационный номер основного вызова" column="REG_NO" type="number"/>
+            <entity id="ce_ref_CALL_NUMB" caption="Номер вызова основного вызова" column="call_numb" type="number"/>
+        </entity>
+        <entity id="ce_is_mob_device_use" caption="Использовалось мобильное устройство" defMap="vw_sc_mob_device_use" column="is_mob_device_use" type="boolean"/>
+    </entity>
+
+    <entity id="id_addr" caption="Адрес происшествия">
+        <entity id="id_addr_ADRESS" caption="Адрес" defMap="ce" column="adress" type="text"/>
+        <entity id="id_addr_CITY_AREA_d" caption="Район" defMap="ce_direct_ar" column="caption" type="dictionary">
+            <dictionary ref="dic_area" defMap="ce_direct_city" column="id_city_area"
+                        refDictionaryColumn="dic_area_id"/>
+            <entity id="id_addr_CITY_AREA" caption="Район наименование" column="caption" type="text"/>
+        </entity>
+        <entity id="id_addr_CITY_AREA2_d" caption="Район2" defMap="ce_direct_ar2" column="caption" type="dictionary">
+            <dictionary ref="dic_area" defMap="ce" column="id_city_area"
+                        refDictionaryColumn="dic_area_id"/>
+            <entity id="id_addr_CITY_AREA2" caption="Район наименование" column="caption" type="text"/>
+        </entity>
+        <entity id="id_addr_CITY_NAME" caption="Город" defMap="ce_direct_city" column="caption" type="text"/>
+        <entity id="id_addr_STREET_NAME" caption="Улица" defMap="ce_street" column="caption" type="text"/>
+        <entity id="id_addr_HOME" caption="Номер дома" defMap="ce_base_adress" column="home" type="text"/>
+        <entity id="id_addr_FLAT" caption="Квартира" defMap="ce" column="flat" type="text"/>
+        <!--        <entity id="id_addr_03_LAT" caption="Широта" defMap="patient_ba" column="lat" type="number" />-->
+        <!--        <entity id="id_addr_03_LON" caption="Долгота" defMap="patient_ba" column="lon" type="number"/>-->
+    </entity>
+
+    <entity id="e_ct" caption="Задействованная техника" defMap="ct">
+        <entity id="e_ct_name" caption="Позывной" defMap="ct_technika_cn" column="caption" type="text"/>
+        <entity id="e_ct_send_time" caption="Время отправки" column="send_time" type="dateTime"/>
+        <entity id="e_ct_place_time" caption="Время прибытия на место происшествия" column="at_place_time"
+                type="dateTime"/>
+        <entity id="e_ct_return_time" caption="Время убытия с места происшествия" column="return_time" type="dateTime"/>
+        <entity id="e_ct_receive_time" caption="Время получения команды на выезд" column="receive_time"
+                type="dateTime"/>
+
+        <entity id="e_ct_retreat_time" caption="Время получения отбоя" column="retreat_time"
+                type="dateTime"/>
+
+
+        <entity id="e_ct_to_hospital" caption="Время начала транспортировки" column="to_hospital"
+                type="dateTime"/>
+
+        <entity id="e_ct_at_hospital" caption="Время окончания транспортировки" column="at_hospital"
+                type="dateTime"/>
+
+        <entity id="e_ct_at_base_time" caption="Время возврата на базу" column="at_base_time"
+                type="dateTime"/>
+
+
+        <entity id="e_ct_caption_d" caption="Наименование сил и средств" defMap="ct_technika" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_technika" defMap="ct_technika" column="id" refDictionaryColumn="dic_technika_id"/>
+            <entity id="e_ct_caption" caption="Наименование сил и средств" defMap="ct_technika" column="caption"
+                    type="text"/>
+        </entity>
+        <entity id="e_ct_tt" caption="Наименование типа сил и средств" defMap="ct_te_tt" column="caption" type="text">
+            <entity id="e_ct_tt_av" caption="Авиационный транспорт" defMap="ct_te_tt" column="is_avia" type="boolean"/>
+        </entity>
+
+        <entity id="e_ct_sent_type_cap" caption="Способ передачи вызова" defMap="ct_sent_type" column="caption"
+                type="text"/>
+
+        <entity id="e_ct_t_pult_caption" caption="Служба владелец техники" defMap="ct_technika_pult" column="caption"
+                type="text"/>
+    </entity>
+
+    <entity id="e_ct_b" caption="Задействованная бригада" defMap="ct_b">
+        <entity id="e_ct_b_name" caption="Позывной" defMap="ct_brigade_cn" column="caption" type="text"/>
+        <entity id="e_ct_b_send_time" caption="Время отправки" column="send_time" type="dateTime"/>
+        <entity id="e_ct_b_place_time" caption="Время прибытия на место происшествия" column="at_place_time"
+                type="dateTime"/>
+        <entity id="e_ct_b_return_time" caption="Время убытия с места происшествия" column="return_time"
+                type="dateTime"/>
+        <entity id="e_ct_b_receive_time" caption="Время получения команды на выезд" column="receive_time"
+                type="dateTime"/>
+
+        <entity id="e_ct_b_retreat_time" caption="Время получения отбоя" column="retreat_time"
+                type="dateTime"/>
+
+        <entity id="e_ct_b_to_hospital" caption="Время начала транспортировки" column="to_hospital"
+                type="dateTime"/>
+
+        <entity id="e_ct_b_at_hospital" caption="Время окончания транспортировки" column="at_hospital"
+                type="dateTime"/>
+
+        <entity id="e_ct_at_b_base_time" caption="Время возврата на базу" column="at_base_time"
+                type="dateTime"/>
+
+        <entity id="e_ct_b_caption" caption="Наименование сил и средств" defMap="ct_brigade" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_brig" defMap="ct_brigade" column="id" refDictionaryColumn="dic_brig_id"/>
+        </entity>
+        <entity id="e_ct_b_tt" caption="Наименование типа сил и средств" defMap="ct_br_tt" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_ct_br_tt" defMap="ct_b" column="id_tech_type" refDictionaryColumn="dic_ct_br_tt_id"/>
+        </entity>
+
+        <entity id="e_ct_sent_type_b_cap" caption="Способ передачи вызова" defMap="ct_sent_type_b" column="caption"
+                type="text"/>
+        <entity id="e_b_pult_caption_d" caption="Служба владелец бригады" defMap="ct_brigade_pult" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_ct_brigade_pult" defMap="ct_brigade" column="ID_PULT"
+                        refDictionaryColumn="dic_ct_brigade_pult_id"/>
+            <entity id="e_b_pult_caption" caption="Наименование службы кто владеет бригадой" defMap="ct_brigade_pult"
+                    column="caption" type="text"/>
+        </entity>
+        <entity id="e_ct_b_dutys_caption" caption="Наряд бригады" defMap="dutys_brig" column="duty_name" type="text">
+            <entity id="e_ct_b_dutys_id" caption="Идентификатор" defMap="dutys_brig"
+                    column="id" type="number"/>
+            <entity id="e_ct_b_dutys_st_pl" caption="Планируемое время начала наряда" defMap="dutys_brig"
+                    column="date_start_plan" type="dateTime"/>
+            <entity id="e_ct_b_dutys_en_pl" caption="Планируемое время завершения наряда" defMap="dutys_brig"
+                    column="date_end_plan" type="dateTime"/>
+            <entity id="e_ct_b_dutys_st" caption="Время начала наряда" defMap="dutys_brig" column="date_start_act"
+                    type="dateTime"/>
+            <entity id="e_ct_b_dutys_en" caption="Время завершения наряда" defMap="dutys_brig" column="date_end_act"
+                    type="dateTime"/>
+            <entity id="e_ct_b_dutys_sh_c" caption="Смена бригады" defMap="duty_shift_plan_brig" column="caption"
+                    type="text">
+                <entity id="e_ct_b_dutys_sh_st" caption="Время начала смены" defMap="duty_shift_plan_brig"
+                        column="date_start_act" type="dateTime"/>
+                <entity id="e_ct_b_dutys_sh_en" caption="Время завершения смены" defMap="duty_shift_plan_brig"
+                        column="date_end_act" type="dateTime"/>
+                <entity id="e_ct_b_dutys_sh_r_d" caption="Тип смена бригады" defMap="duty_shift_plan_root_brig"
+                        column="caption" type="dictionary">
+                    <dictionary ref="dic_root_duty_shift_plan" defMap="duty_shift_plan_brig" column="id_duty_shift"
+                                refDictionaryColumn="dic_root_duty_shift_plan_id"/>
+                </entity>
+            </entity>
+        </entity>
+    </entity>
+
+    <entity id="card03" caption="Карточка 03" defMap="apa">
+        <entity id="card03_p" caption="ФИО пациента" defMap="arm03_call"
+                expression="JOIN(' ', arm03_call.PATIENT, arm03_call.PATIENT_FIRSTNAME, arm03_call.PATIENT_MIDDLENAME)"
+                type="text">
+            <entity id="card03_p_F" caption="Фамилия" column="PATIENT" type="text"/>
+            <entity id="card03_p_I" caption="Имя" column="PATIENT_FIRSTNAME" type="text"/>
+            <entity id="card03_p_O" caption="Отчество" column="PATIENT_MIDDLENAME" type="text"/>
+        </entity>
+        <entity id="card03_anamnesis" caption="Анамнез" defMap="apa" column="anamnesis" type="text"/>
+        <entity id="card03_age_p" caption="Возраст пациента" defMap="arm03_call"
+                expression="
+                   CASE(null,
+                   WHEN(GR(arm03_call.YEARS, 0), CONCATENATE(arm03_call.YEARS, ' л.')),
+                   WHEN(GR(arm03_call.MONTHS, 0), CONCATENATE(arm03_call.MONTHS, ' м.')),
+                   WHEN(GR(arm03_call.DAYS, 0), CONCATENATE(arm03_call.DAYS, ' д.')))" type="dictionary">
+            <dictionary ref="dic_age_pat"
+                        providerClass="org.next.schema.core.dictionary.impl.AgeGroupResolveQueryByDictionary"/>
+            <entity id="card03_age_p_y" caption="Лет" column="YEARS" type="number"/>
+            <entity id="card03_age_p_m" caption="Месяцев" column="MONTHS" type="number"/>
+            <entity id="card03_age_p_d" caption="Дней" column="DAYS" type="number"/>
+        </entity>
+        <entity id="card03_cp_dic" caption="Категория пациента" defMap="a03_category_patient" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_category_patient_d" defMap="patient" column="ID_CATEGORY_PATIENT"
+                        refDictionaryColumn="dic_category_patient_d_id"/>
+            <entity id="card03_cp" caption="Наименование категория пациента" defMap="a03_category_patient"
+                    type="text" column="caption"/>
+        </entity>
+        <entity id="card03_country_d" caption="Гражданство" defMap="country_tree_coun" type="dictionary">
+            <dictionary ref="dic_country_only_d" defMap="patient" column="ID_COUNTRY"
+                        refDictionaryColumn="dic_country_only_d_id"/>
+            <entity id="card03_country_caption" caption="Гражданство наименование страны" defMap="country_tree_coun"
+                    type="text" column="caption"/>
+            <entity id="card03_country_caption_full" caption="Гражданство полное наименование страны"
+                    defMap="country_tree_coun" type="text" column="caption_full"/>
+            <entity id="card03_country_caption_code" caption="Гражданство цифровой код страны"
+                    defMap="country_tree_coun" type="text" column="code"/>
+            <entity id="card03_country_caption_code2" caption="Гражданство 2 буквенный код страны"
+                    defMap="country_tree_coun" type="text" column="code2char"/>
+            <entity id="card03_country_caption_code3" caption="Гражданство 3 буквенный код страны"
+                    defMap="country_tree_coun" type="text" column="code3char"/>
+        </entity>
+
+        <entity id="card03_pat_document_all" defMap="patient"
+                expression="CONCATENATE(patient.passport_series, ' ', patient.passport_number)"
+                caption="Документ удостоверяющий личность пациента" type="text">
+            <entity id="card03_pat_document_num" caption="Номер документа удостоверяющего личность пациента"
+                    column="passport_number" type="text"/>
+            <entity id="card03_pat_document_ser" caption="Серия документа удостоверяющего личность пациента"
+                    column="passport_series" type="text"/>
+            <entity id="card03_pat_document_type_d" defMap="patient_doc_type" column="caption"
+                    caption="Тип документа удостоверяющего личность пациента" type="dictionary">
+                <dictionary ref="dic_doc_type_d" defMap="patient" column="id_document_type"
+                            refDictionaryColumn="dic_doc_type_d_id"/>
+                <entity id="card03_pat_document_type" defMap="patient_doc_type" column="caption"
+                        caption="Наименование документа удостоверяющего личность" type="text"/>
+                <entity id="card03_pat_document_type_code" defMap="patient_doc_type" column="code"
+                        caption="Код документа удостоверяющего личность" type="text"/>
+            </entity>
+        </entity>
+        <entity id="card03_icd10_primary" caption="Основной диагноз" defMap="icd10_primary"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="id_primary_icd10" refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_primary_cap" caption="Расшифровка (ОД)" column="caption" type="text"/>
+            <entity id="card03_icd10_primary_cod" caption="Код (ОД)" column="code" type="text"/>
+            <entity id="card03_icd10_primary_text" caption="Основной диагноз по карте (ОД)" defMap="apa"
+                    column="diagnosis"
+                    type="text"/>
+            <entity id="card03_icd10_primary_block_cap" caption="Блок (ОД)" defMap="icd10_primary_block"
+                    column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_primary_block_reg" caption="Диапазон блока (ОД)" defMap="icd10_primary_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_primary_class_cap" caption="Класс (ОД)" defMap="icd10_primary_class"
+                    column="caption"
+                    type="text"/>
+
+        </entity>
+        <entity id="card03_icd10_hos_dia" caption="Диагноз приемного отделения" defMap="icd10_hos_dia"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="ID_HOSPITAL_DIAGNOSIS_ICD10"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_hos_dia_text" caption="По карте (ПО)" defMap="apa" column="hospital_diagnosis"
+                    type="text"/>
+            <entity id="card03_icd10_hos_dia_cap" caption="Расшифровка (ПО)" column="caption" type="text"/>
+            <entity id="card03_icd10_hos_dia_cod" caption="Код (ПО)" column="code" type="text"/>
+            <entity id="card03_icd10_hos_dia_block_cap" caption="Блок (ПО)" defMap="icd10_hos_dia_block"
+                    column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_hos_dia_block_reg" caption="Диапазон блока (ПО)" defMap="icd10_hos_dia_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_hos_dia_class_cap" caption="Класс (ПО)" defMap="icd10_hos_dia_class"
+                    column="caption"
+                    type="text"/>
+        </entity>
+
+        <entity id="card03_icd10_acc" caption="Сопутствующий диагноз" defMap="icd10_acc"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="ID_ACCOMPANYING_ICD10"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_acc_cap" caption="Расшифровка (СД)" column="caption" type="text"/>
+            <entity id="card03_icd10_acc_cod" caption="Код (СД)" column="code" type="text"/>
+            <entity id="card03_icd10_acc_block_cap" caption="Блок (СД)" defMap="icd10_acc_block" column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_acc_block_reg" caption="Диапазон блока (СД)" defMap="icd10_acc_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_acc_class_cap" caption="Класс (СД)" defMap="icd10_acc_class" column="caption"
+                    type="text"/>
+        </entity>
+
+        <entity id="card03_icd10_icd" caption="Непосредственная причина смерти" defMap="icd10_icd"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="ID_immediate_cause_death_ICD10"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_icd_text" caption="По карте (НПС)" defMap="apa" column="immediate_cause_death"
+                    type="text"/>
+            <entity id="card03_icd10_icd_cap" caption="Расшифровка (НПС)" column="caption" type="text"/>
+            <entity id="card03_icd10_icd_cod" caption="Код (НПС)" column="code" type="text"/>
+            <entity id="card03_icd10_icd_block_cap" caption="Блок (НПС)" defMap="icd10_icd_block" column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_icd_block_reg" caption="Диапазон блока (НПС)" defMap="icd10_icd_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_icd_class_cap" caption="Класс (НПС)" defMap="icd10_icd_class" column="caption"
+                    type="text"/>
+        </entity>
+
+        <entity id="card03_icd10_ec" caption="Внешняя причина происшествия" defMap="icd10_ec"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="id_external_cause_icd10"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_ec_text" caption="По карте (ВПП)" defMap="apa" column="external_cause"
+                    type="text"/>
+            <entity id="card03_icd10_ec_cap" caption="Расшифровка (ВПП)" column="caption" type="text"/>
+            <entity id="card03_icd10_ec_cod" caption="Код (ВПП)" column="code" type="text"/>
+            <entity id="card03_icd10_ec_block_cap" caption="Блок (ВПП)" defMap="icd10_ec_block" column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_ec_block_reg" caption="Диапазон блока (ВПП)" defMap="icd10_ec_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_ec_class_cap" caption="Класс (ВПП)" defMap="icd10_ec_class" column="caption"
+                    type="text"/>
+        </entity>
+
+
+        <entity id="card03_icd10_final" caption="Заключительный диагноз" defMap="icd10_final"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="id_icd10_final"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_final_cap" caption="Расшифровка (ЗД)" column="caption" type="text"/>
+            <entity id="card03_icd10_final_cod" caption="Код (ЗД)" column="code" type="text"/>
+            <entity id="card03_icd10_final_block_cap" caption="Блок (ЗД)" defMap="icd10_final_block" column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_final_block_reg" caption="Диапазон блока (ЗД)" defMap="icd10_final_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_final_class_cap" caption="Класс (ЗД)" defMap="icd10_final_class" column="caption"
+                    type="text"/>
+        </entity>
+
+        <entity id="card03_icd10_bcd" caption="Основная причина смерти" defMap="icd10_bcd"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="id_basic_cause_death_icd10"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_bcd_text" caption="По карте (ОПС)" defMap="apa" column="basic_cause_death"
+                    type="text"/>
+            <entity id="card03_icd10_bcd_cap" caption="Расшифровка (ОПС)" column="caption" type="text"/>
+            <entity id="card03_icd10_bcd_cod" caption="Код (ОПС)" column="code" type="text"/>
+            <entity id="card03_icd10_bcd_block_cap" caption="Блок (ОПС)" defMap="icd10_bcd_block" column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_bcd_block_reg" caption="Диапазон блока (ОПС)" defMap="icd10_bcd_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_bcd_class_cap" caption="Класс (ОПС)" defMap="icd10_bcd_class" column="caption"
+                    type="text"/>
+        </entity>
+
+        <entity id="card03_icd10_ad" caption="Дополнительный диагноз" defMap="icd10_ad"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="id_additional_diagnosis_icd10"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_ad_cap" caption="Расшифровка (ОПС)" column="caption" type="text"/>
+            <entity id="card03_icd10_ad_cod" caption="Код (ОПС)" column="code" type="text"/>
+            <entity id="card03_icd10_ad_block_cap" caption="Блок (ОПС)" defMap="icd10_ad_block" column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_ad_block_reg" caption="Диапазон блока (ОПС)" defMap="icd10_ad_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_ad_class_cap" caption="Класс (ОПС)" defMap="icd10_ad_class" column="caption"
+                    type="text"/>
+        </entity>
+
+        <entity id="card03_icd10_foms" caption="Диагноз для ФОМС" defMap="icd10_foms" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="id_extra_diagnosis_icd10"
+                        refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_foms_cap" caption="Расшифровка (Ф)" column="caption" type="text"/>
+            <entity id="card03_icd10_foms_cod" caption="Код (Ф)" column="code" type="text"/>
+
+            <entity id="card03_icd10_foms_block_cap" caption="Блок (Ф)" defMap="icd10_foms_block" column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_foms_block_reg" caption="Диапазон блока (Ф)" defMap="icd10_foms_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_foms_class_cap" caption="Класс (Ф)" defMap="icd10_foms_class" column="caption"
+                    type="text"/>
+
+        </entity>
+
+        <entity id="card03_icd10_comp" caption="Диагноз осложнения" defMap="icd10_comp"
+                column="caption"
+                type="dictionary">
+            <dictionary ref="dic_icd10" defMap="apa" column="id_complication_icd10" refDictionaryColumn="dic_icd10_id"/>
+            <entity id="card03_icd10_comp_cap" caption="Расшифровка (О)" column="caption" type="text"/>
+            <entity id="card03_icd10_comp_cod" caption="Код (О)" column="code" type="text"/>
+            <entity id="card03_icd10_comp_text" caption="Диагноз осложнения по карте (О)" defMap="apa"
+                    column="complication_diagnosis"
+                    type="text"/>
+            <entity id="card03_icd10_comp_block_cap" caption="Блок (О)" defMap="icd10_comp_block"
+                    column="caption"
+                    type="text"/>
+            <entity id="card03_icd10_comp_block_reg" caption="Диапазон блока (О)" defMap="icd10_comp_block"
+                    column="numb"
+                    type="text"/>
+            <entity id="card03_icd10_comp_class_cap" caption="Класс (О)" defMap="icd10_comp_class"
+                    column="caption"
+                    type="text"/>
+
+        </entity>
+
+        <entity id="c03_hospital" caption="ЛПУ по КТС" defMap="hospital" column="caption" type="dictionary">
+            <dictionary ref="dic_hospital" defMap="apa" column="id_hospital" refDictionaryColumn="dic_hospital_id"/>
+            <entity id="c03_hospital_caption" caption="Наименование ЛПУ" column="caption" type="text"/>
+            <entity id="c03_hospital_type_d" caption="Тип ЛПУ" defMap="hospital_type" column="caption"
+                    type="dictionary">
+                <dictionary ref="dic_hospital_type" defMap="hospital" column="id_hospital_type"
+                            refDictionaryColumn="dic_hospital_type_id"/>
+                <entity id="c03_hospital_type_caption" caption="Наименование типа ЛПУ" column="caption" type="text"/>
+            </entity>
+            <entity id="c03_hospital_level_code" caption="Код уровня ЛПУ" defMap="hospital_level" column="code"
+                    type="text">
+            </entity>
+        </entity>
+
+        <entity id="c03_hospital_dt" caption="ЛПУ по доп. талону" defMap="hospital_dt" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_hospital" defMap="arm03_call" column="id_hospital"
+                        refDictionaryColumn="dic_hospital_id"/>
+            <entity id="c03_hospital_dt_caption" caption="Наименование ЛПУ" column="caption" type="text"/>
+            <entity id="c03_hospital_dt_type_d" caption="Тип ЛПУ" defMap="hospital_dt_type" column="caption"
+                    type="dictionary">
+                <dictionary ref="dic_hospital_type" defMap="hospital_dt" column="id_hospital_type"
+                            refDictionaryColumn="dic_hospital_type_id"/>
+                <entity id="c03_hospital_dt_type_caption" caption="Наименование типа ЛПУ" column="caption" type="text"/>
+            </entity>
+            <entity id="c03_hospital_dt_level_code" caption="Код уровня ЛПУ" defMap="hospital_dt_level" column="code"
+                    type="text">
+            </entity>
+        </entity>
+
+        <entity id="c03_pat_sex_d" caption="Пол пациента" defMap="patient" expression="
+                   CASE(null,
+                   WHEN(EQ(patient.sex, 1), 'Мужской'),
+                   WHEN(EQ(patient.sex, 2), 'Женский'),
+                   WHEN(EQ(patient.sex, 0), 'Не определен'))" type="dictionary">
+            <dictionary ref="dic_emb_sex" defMap="patient" column="sex" refDictionaryColumn="dic_emb_sex_id"/>
+            <entity id="c03_pat_sex_id" caption="Пол пациента код" defMap="patient" column="sex" type="number"/>
+            <entity id="c03_pat_sex_caption" caption="Пол пациента расшифровка" defMap="patient" expression="
+                   CASE(null,
+                   WHEN(EQ(patient.sex, 1), 'Мужской'),
+                   WHEN(EQ(patient.sex, 2), 'Женский'),
+                   WHEN(EQ(patient.sex, 0), 'Не определен'))" type="text"/>
+        </entity>
+        <entity id="c03_pat_snils" caption="СНИЛС пациента" defMap="patient" column="snils" type="text"/>
+        <entity id="c03_pat_birthday" caption="Дата рождения пациента" defMap="patient" column="birthday"
+                type="dateTime"/>
+        <entity id="c03_acci_cause_dict" caption="Причина НС" defMap="a03_acci_cause" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_arm03_accident_cause" defMap="a03_acci_cause" column="ID"
+                        refDictionaryColumn="dic_arm03_accident_cause_id"/>
+            <entity id="c03_acci_cause_caption" caption="Наименование причина НС " defMap="a03_acci_cause"
+                    column="caption" type="text"/>
+        </entity>
+
+        <entity id="c03_depa_cause_res" caption="Характер вызова по результату" defMap="a03_depa_cause_res"
+                column="caption" type="dictionary">
+            <dictionary ref="dic_arm03_departure_cause" defMap="a03_depa_cause_res" column="ID"
+                        refDictionaryColumn="dic_arm03_departure_cause_id"/>
+            <entity id="c03_depa_cause_res_caption" caption="Характер вызова по результату" column="caption"
+                    type="text"/>
+            <entity id="c03_depa_cause_res_is_tran" caption="Транспортировка" column="is_transporting" type="boolean"/>
+
+            <entity id="c03_depa_cause_res_is_sud_illness" caption="Признак внезапного заболевания"
+                    column="is_sud_illness" type="boolean"/>
+            <entity id="c03_depa_cause_res_is_accounting_maternity" caption="Признак роды или патологии беременности"
+                    column="is_accounting_maternity" type="boolean"/>
+            <entity id="c03_depa_cause_res_is_accident" caption="Признак несчастного случая" column="is_accident"
+                    type="boolean"/>
+        </entity>
+
+        <entity id="c03_depa_cause" caption="Характер вызова" defMap="a03_depa_cause" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_arm03_departure_cause" defMap="a03_depa_cause" column="ID"
+                        refDictionaryColumn="dic_arm03_departure_cause_id"/>
+            <entity id="c03_depa_cause_caption" caption="Характер вызова" column="caption" type="text"/>
+            <entity id="c03_depa_cause_is_tran" caption="Транспортировка" column="is_transporting" type="boolean"/>
+
+            <entity id="c03_depa_cause_is_sud_illness" caption="Признак внезапного заболевания" column="is_sud_illness"
+                    type="boolean"/>
+            <entity id="c03_depa_cause_is_accounting_maternity" caption="Признак роды или патологии беременности"
+                    column="is_accounting_maternity" type="boolean"/>
+            <entity id="c03_depa_cause_is_accident" caption="Признак несчастного случая" column="is_accident"
+                    type="boolean"/>
+        </entity>
+
+        <entity id="c03_depa_result" caption="Результат вызова" defMap="a03_depa_result" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_arm03_departure_result" defMap="apa" column="ID_DEPARTURE_RESULT"
+                        refDictionaryColumn="dic_arm03_departure_result_id"/>
+            <entity id="c03_depa_result_caption" caption="Результат вызова" column="caption"
+                    type="text"/>
+            <entity id="c03_depa_result_cod" caption="Результат вызова код" column="code"
+                    type="text"/>
+            <entity id="c03_result_call_is_without" caption="Признак безрезультатного вызова" defMap="a03_depa_result"
+                    column="is_without_result" type="boolean"/>
+        </entity>
+
+        <entity id="c03_is_hospitalized" caption="Госпитализирован" defMap="apa" column="is_hospitalized"
+                type="boolean"/>
+        <entity id="c03_pat_reg_place" caption="Место проживания" defMap="patient" column="REGISTRATION_PLACE"
+                type="text"/>
+        <entity id="c03_doctor" caption="Старший бригады" defMap="a03_stf_doctor" column="FIO" type="text">
+            <entity id="c03_doctor_appointment" caption="Старший бригады должность" defMap="a03_stf_doctor_appointment"
+                    column="caption" type="text"/>
+            <entity id="c03_doctor_app_code_tfoms" caption="Код специальности по ТФОМС" defMap="a03_stf_spec_tfoms"
+                    column="code" type="text"/>
+        </entity>
+        <entity id="c03_pat_work_place" caption="Место работы" defMap="patient" column="work_Place" type="text"/>
+        <entity id="c03_pat_place_deliv" caption="Доставка в" defMap="a03_place_deliv" column="caption" type="text"/>
+        <entity id="c03_cpr_dead_occured" caption="СЛР смерть наступила" defMap="a03_cpr_dead_occured" column="caption"
+                type="text"/>
+        <entity id="с03_pat_signal_list" caption="Сигнальный лист" defMap="arm03_call" column="signal_list"
+                type="text"/>
+
+        <entity id="e_ct_spec_b" caption="Спец. бригада" defMap="ct_spec_brigade_cn" column="caption" type="text">
+            <entity id="e_ct_spec_b_name" caption="Позывной спец. бригады" defMap="ct_spec_brigade_cn" column="caption" type="text"/>
+            <entity id="e_ct_spec_b_caption" caption="Наименование сил и средств спец. бригады" defMap="ct_spec_brigade" column="caption"
+                    type="dictionary">
+                <dictionary ref="dic_brig" defMap="ct_spec_brigade" column="id" refDictionaryColumn="dic_brig_id"/>
+            </entity>
+        </entity>
+
+
+        <entity id="c03_lpu_act" caption="Активный вызов в ЛПУ" defMap="lpu_act" column="caption" type="dictionary">
+            <dictionary ref="dic_hospital" defMap="apa" column="ID_ACT_CALL_HOSPITAL"
+                        refDictionaryColumn="dic_hospital_id"/>
+            <entity id="c03_lpu_act_capt" caption="Активный вызов в ЛПУ наименование" defMap="lpu_act" column="caption"
+                    type="text"/>
+            <entity id="c03_lpu_act_type_d" caption="Тип ЛПУ активного вызова" defMap="hospital_type" column="caption"
+                    type="dictionary">
+                <dictionary ref="dic_hospital_type" defMap="hospital" column="id_hospital_type"
+                            refDictionaryColumn="dic_hospital_type_id"/>
+                <entity id="c03_lpu_act_type_caption" caption="Наименование типа ЛПУ активного вызова" column="caption"
+                        type="text"/>
+            </entity>
+        </entity>
+
+
+        <entity id="c03_category_call_d" caption="Категория вызова" defMap="a03_category_call" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_a03_category_call" defMap="arm03_call" column="id_categ_call"
+                        refDictionaryColumn="dic_a03_category_call_id"/>
+            <entity id="c03_category_call" caption="Категория вызова наименование" defMap="a03_category_call"
+                    column="caption" type="text"/>
+        </entity>
+
+        <entity id="c03_category_call_res_d" caption="Категория вызова по результату" defMap="a03_category_call_res"
+                column="caption" type="dictionary">
+            <dictionary ref="dic_a03_category_call" defMap="arm03_call" column="id_categ_call_result"
+                        refDictionaryColumn="dic_a03_category_call_id"/>
+            <entity id="c03_category_call_res" caption="Категория вызова по результату наименование"
+                    defMap="a03_category_call_res" column="caption" type="text"/>
+        </entity>
+
+        <entity id="c03_pat_social_status" caption="Социальный статус" defMap="a03_social_status" column="caption"
+                type="text"/>
+
+        <entity id="c03_assistance_result" caption="Результат помощи" defMap="a03_assistance_result" column="caption"
+                type="text"/>
+        <entity id="c03_assistance_efficiency" caption="Изменение состояния" defMap="arm03_assistance_efficiency"
+                column="caption" type="dictionary">
+            <dictionary ref="dic_a03_assistance_efficiency" defMap="apa" column="id_assistance_efficiency"
+                        refDictionaryColumn="dic_a03_assistance_efficiency_id"/>
+            <entity id="c03_assistance_efficiency_cap" caption="Изменение состояния наименование"
+                    defMap="arm03_assistance_efficiency" column="caption" type="text"/>
+        </entity>
+        <entity id="c03_pat_registration_place_type_cap" caption="Место регистрации"
+                defMap="a03_pat_registration_place_type" column="caption" type="text"/>
+        <entity id="c03_apod_overall_state_cap" caption="Общее состояние" defMap="a03_overall_state" column="caption"
+                type="text"/>
+        <entity id="c03_isdB_st" caption="Подъем сегмента ST до" type="boolean" column="st_up" defMap="isdB"/>
+        <entity id="c03_isdA_st" caption="Подъем сегмента ST после" type="boolean" column="st_up" defMap="isdA"/>
+
+        <entity id="c03_isdB_temp" caption="Температура до" type="number" column="temperature" defMap="isdB"/>
+        <entity id="c03_isdA_temp" caption="Температура после" type="number" column="temperature" defMap="isdA"/>
+
+        <entity id="c03_isdB_chd" caption="ЧД до" type="number" column="respiratory_rate" defMap="isdB"/>
+        <entity id="c03_isdA_chd" caption="ЧД после" type="number" column="respiratory_rate" defMap="isdA"/>
+
+        <entity id="c03_isdB_satur" caption="Сатурация до" type="number" column="saturation" defMap="isdB"/>
+        <entity id="c03_isdA_satur" caption="Сатурация после" type="number" column="saturation" defMap="isdA"/>
+
+        <entity id="c03_isdB_dt_ekg" caption="Время проведения ЭКГ до" type="dateTime" column="ecg_dtime"
+                defMap="isdB"/>
+        <entity id="c03_isdA_dt_ekg" caption="Время проведения ЭКГ после" type="dateTime" column="ecg_dtime"
+                defMap="isdA"/>
+
+        <entity id="apa_hospital_comment" caption="Комментарий для поликлиники" type="text" column="hospital_comment"
+                defMap="apa"/>
+
+        <entity id="c03_is_outpatient" caption="Амбулаторно" defMap="apa" column="is_outpatient" type="boolean"/>
+        <entity id="c03_cpr_result_cap" caption="СЛР результат" defMap="a03_cpr_result" column="caption" type="text"/>
+        <entity id="c03_is_not_hospitalized" caption="Отказ от госпитализации" defMap="apa" column="is_not_hospitalized"
+                type="boolean"/>
+        <entity id="c03_is_denied_hospitalized" caption="Отказ ЛПУ в госпитализации" defMap="apa"
+                column="is_denied_hospitalized"
+                type="boolean"/>
+        <entity id="c03_inebriation" caption="Клиническая картина опьянения" defMap="apa" column="inebriation"
+                type="number"/>
+        <entity id="c03_pat_deathday" caption="Время констатации смерти" defMap="patient" column="deathday"
+                type="dateTime"/>
+        <entity id="c03_call_place_cap" caption="Место вызова" defMap="a03_call_place" column="caption" type="text"/>
+        <entity id="c03_addit_params" caption="Доп. ориентиры" defMap="arm03_call" column="addit_params" type="text"/>
+        <entity id="c03_accident_cause_desc" caption="Причина несчастного случая (Прочее)" defMap="apa"
+                column="accident_cause_desc" type="text"/>
+        <entity id="c03_substation_senior_doctor" caption="Старший врач подстанции" defMap="apa"
+                column="substation_senior_doctor" type="text"/>
+
+        <entity id="c03_substation_chief" caption="Зав. подстанции" defMap="apa"
+                column="substation_chief" type="text"/>
+
+        <entity id="c03_deputy_head_doctor" caption="Зам. глав. врача по КЭР" defMap="apa"
+                column="deputy_head_doctor" type="text"/>
+
+        <entity id="c03_ukl1" caption="УКЛ 1" defMap="arm03_call" column="ukl_1" type="number"/>
+        <entity id="c03_ukl2" caption="УКЛ 2" defMap="arm03_call" column="ukl_2" type="number"/>
+        <entity id="c03_ukl3" caption="УКЛ 3" defMap="arm03_call" column="ukl_3" type="number"/>
+
+        <entity id="c03_lqc1Edm" caption="УКЛ ОДМ 1" defMap="arm03_call" column="lqc1_edm" type="number"/>
+        <entity id="c03_lqc1Ed" caption="УКЛ ОД 1" defMap="arm03_call" column="lqc1_ed" type="number"/>
+        <entity id="c03_lqc1Ecc" caption="УКЛ ОКВ 1" defMap="arm03_call" column="lqc1_ecc" type="number"/>
+        <entity id="c03_lqc1Ea" caption="УКЛ ОМП 1" defMap="arm03_call" column="lqc1_ea" type="number"/>
+        <entity id="c03_lqc1Otl" caption="УКЛ ОТЛ 1" defMap="arm03_call" column="lqc1_otl" type="number"/>
+
+        <entity id="c03_lqc2Edm" caption="УКЛ ОДМ 2" defMap="arm03_call" column="lqc2_edm" type="number"/>
+        <entity id="c03_lqc2Ed" caption="УКЛ ОД 2" defMap="arm03_call" column="lqc2_ed" type="number"/>
+        <entity id="c03_lqc2Ecc" caption="УКЛ ОКВ 2" defMap="arm03_call" column="lqc2_ecc" type="number"/>
+        <entity id="c03_lqc2Ea" caption="УКЛ ОМП 2" defMap="arm03_call" column="lqc2_ea" type="number"/>
+        <entity id="c03_lqc2Otl" caption="УКЛ ОТЛ 2" defMap="arm03_call" column="lqc2_otl" type="number"/>
+
+        <entity id="c03_lqc3Edm" caption="УКЛ ОДМ 3" defMap="arm03_call" column="lqc3_edm" type="number"/>
+        <entity id="c03_lqc3Ed" caption="УКЛ ОД 3" defMap="arm03_call" column="lqc3_ed" type="number"/>
+        <entity id="c03_lqc3Ecc" caption="УКЛ ОКВ 3" defMap="arm03_call" column="lqc3_ecc" type="number"/>
+        <entity id="c03_lqc3Ea" caption="УКЛ ОМП 3" defMap="arm03_call" column="lqc3_ea" type="number"/>
+        <entity id="c03_lqc3Otl" caption="УКЛ ОТЛ 3" defMap="arm03_call" column="lqc3_otl" type="number"/>
+
+        <entity id="c03_ukl_expert_remark" caption="Протокол экспертизы" defMap="arm03_call" column="ukl_expert_remark"
+                type="text"/>
+        <entity id="c03_ukl_expert_notice" caption="Протокол экспертизы замечания" defMap="arm03_call"
+                column="ukl_expert_notice" type="boolean"/>
+
+        <entity id="c03_ist_fin_dic" caption="Источник финансирования" defMap="a03_ist_fin" column="caption" type="dictionary">
+            <dictionary ref="dic_c03_ist_fin" defMap="apa" column="ID_IST_FIN"
+                        refDictionaryColumn="dic_c03_ist_fin_id"/>
+            <entity id="c03_ist_fin_cap" caption="Источник финансирования наименование" defMap="a03_ist_fin" column="caption"
+                    type="text"/>
+        </entity>
+        <entity id="c03_pat_unified_policy_number" caption="Номер полиса" defMap="patient"
+                column="unified_policy_number" type="text">
+            <entity id="c03_pat_unified_policy_ser_number" caption="Серия полиса"
+                    column="policy_blank_series" type="text"/>
+            <entity id="c03_territory_insures_d" caption="Территория страхования" defMap="country_tree_reg"
+                    column="caption" type="dictionary">
+                <dictionary ref="dic_country_sub_d" defMap="patient" column="id_territory_insures"
+                            refDictionaryColumn="dic_country_sub_d_id"/>
+                <entity id="c03_territory_insures_caption" caption="Территория страхования наименование"
+                        defMap="country_tree_reg" column="caption" type="text"/>
+                <entity id="c03_territory_insures_code" caption="Территория страхования цифровой код"
+                        defMap="country_tree_reg" column="code" type="text"/>
+                <entity id="c03_territory_insures_okato" caption="Территория страхования код ОКАТО"
+                        defMap="country_tree_reg" column="okato" type="text"/>
+            </entity>
+            <entity id="c03_arm03_vpolis_d" caption="Тип полиса" defMap="arm03_vpolis" column="caption"
+                    type="dictionary">
+                <dictionary ref="dic_arm03_vpolis" defMap="patient" column="ID_VPOLIS"
+                            refDictionaryColumn="dic_arm03_vpolis_id"/>
+                <entity id="c03_arm03_vpolis_caption" caption="Тип полиса наименование" defMap="arm03_vpolis"
+                        column="caption" type="text"/>
+                <entity id="c03_arm03_vpolis_code" caption="Код типа полиса наименование" defMap="arm03_vpolis"
+                        column="code" type="text"/>
+            </entity>
+        </entity>
+
+        <entity id="c03_is_primary_damage_waiver" caption="Первичный случай ДТП" defMap="arm03_call"
+                column="is_primary_damage_waiver" type="boolean"/>
+        <entity id="c03_cause_no_hospitalis_cap" caption="Причины отказа в госпитализации"
+                defMap="a03_cause_no_hospitalis" column="caption" type="text"/>
+
+        <entity id="c03_urgent_notification_date" caption="Экстр. извещение дата" defMap="apa"
+                column="urgent_notification_date" type="dateTime"/>
+        <entity id="c03_urgent_notification_number" caption="Номер экстр. извещения" defMap="apa"
+                column="urgent_notification_number" type="text"/>
+        <entity id="c03_time_transfer_to_police" caption="Время передачи в полицию" defMap="arm03_call"
+                column="time_transfer_to_police" type="dateTime"/>
+
+        <entity id="c03_pat_profession" caption="Профессия" defMap="patient" column="profession" type="text"/>
+        <entity id="c03_op_division_senior_doctor" caption="Старший врач оперативного отдела" defMap="apa"
+                column="op_division_senior_doctor" type="text"/>
+        <entity id="c03_is_exported_to_foms" caption="Принято к оплате" defMap="arm03_call" column="is_exported_to_foms"
+                type="boolean"/>
+        <entity id="c03_is_perform_cpr" caption="Проведена СЛР" defMap="apa" column="is_perform_cpr" type="boolean"/>
+        <entity id="c03_insurance_company" caption="СМО" defMap="a03_insurance_company" column="caption" type="dictionary">
+            <dictionary ref="dic_smo" defMap="patient"
+                        column="ID_INSURANCE_COMPANY" refDictionaryColumn="dic_smo_id"/>
+            <entity id="c03_insurance_company_cap" caption="СМО наименование" column="caption" type="text"/>
+            <entity id="c03_insurance_company_code" caption="СМО код" column="code" type="text"/>
+            <entity id="c03_insurance_company_okato_oms" caption="СМО ОКАТО" column="okato_oms" type="text"/>
+        </entity>
+
+        <entity id="c03_pat_series_policy" caption="Серия полиса" defMap="patient" column="series_policy"
+                type="text"/>
+        <entity id="c03_date_of_disease" caption="Дата заболевания" defMap="apa" column="date_of_disease"
+                type="dateTime"/>
+        <entity id="c03_cpr_cardiac_arrest_cap" caption="СЛР вид остановки сердца" defMap="a03_cpr_cardiac_arrest"
+                column="caption" type="text"/>
+
+        <entity id="c03_h_bac_mat_cap" caption="Бак материал доставлен в" defMap="h_bac_mat" column="caption"
+                type="text"/>
+        <entity id="c03_afterwards_doctor_visit_clinic" caption="Поликлиника ответственная за активный вызов"
+                defMap="apa" column="afterwards_doctor_visit_clinic" type="text"/>
+        <entity id="c03_afterwards_doctor_visit" caption="Подлежит активному посещению врачом поликлиники" defMap="apa"
+                column="afterwards_doctor_visit" type="boolean"/>
+        <entity id="c03_reported_to_police" caption="Кто передал в полицию" defMap="arm03_call"
+                column="REPORTED_TO_POLICE"
+                type="text"/>
+        <entity id="c03_accepted_duty_police" caption="Кто принял в полиции" defMap="arm03_call"
+                column="accepted_duty_police" type="text"/>
+        <entity id="c03_foms_fill" caption="Заполнено для ФОМС" defMap="arm03_call" type="boolean" column="foms_fill"/>
+
+        <entity id="c03_departure_delay_cause_d" caption="Причина выезда с опозданием"
+                defMap="arm03_departure_delay_cause" type="dictionary" column="caption">
+            <dictionary ref="dic_departure_delay_cause" defMap="arm03_departure_delay_cause"
+                        column="ID_DEPARTURE_DELAY_CAUSE" refDictionaryColumn="dic_departure_delay_cause_id"/>
+            <entity id="c03_departure_delay_cause_cap" caption="Причина выезда с опозданием наименование"
+                    defMap="arm03_departure_delay_cause" type="text" column="caption"/>
+        </entity>
+        <entity id="c03_is_trombolisis_applied" caption="Проведена тромболитическая терапия" defMap="apa"
+                column="is_trombolisis_applied" type="boolean"/>
+        <entity id="c03_car_accident_datetime" caption="Дата ДТП" defMap="apa" column="CAR_ACCIDENT_DATETIME"
+                type="dateTime"/>
+        <entity id="c03_active_call" caption="Активный вызов СМП" defMap="arm03_call" column="ACTIVE_CALL"
+                type="boolean"/>
+
+        <entity id="c03_hospital_p" caption="Поликлиника обслуживания" defMap="place_hospital" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_hospital" defMap="place_hospital_ref" column="id_hospital"
+                        refDictionaryColumn="dic_hospital_id"/>
+            <entity id="c03_hospital_p_caption" caption="Наименование ЛПУ" column="caption" type="text"/>
+            <entity id="c03_hospital_p_type_d" caption="Тип ЛПУ" defMap="place_hospital_type" column="caption"
+                    type="dictionary">
+                <dictionary ref="dic_hospital_type" defMap="place_hospital" column="id_hospital_type"
+                            refDictionaryColumn="dic_hospital_type_id"/>
+                <entity id="c03_hospital_p_type_caption" caption="Наименование типа ЛПУ" column="caption" type="text"/>
+            </entity>
+        </entity>
+        <entity id="c03_is_for_defense_emergencies" caption="Для ГО и ЧС" defMap="arm03_call" column="IS_FOR_DEFENSE_EMERGENCIES"
+                type="boolean"/>
+        <entity id="c03_id_to_help_call" caption="На помощь бригаде, идентификатор вызова" defMap="apa" column="ID_TO_HELP_CALL" type="number"/>
+        <entity id="c03_id_hospital_deliver_dtime" caption="Дата/время приема больного" defMap="apa" column="HOSPITAL_DELIVER_DTIME" type="dateTime"/>
+        <entity id="c03_id_onsite_assistance" caption="Помощь на месте" defMap="apa" column="ONSITE_ASSISTANCE" type="text"/>
+        <entity id="c03_id_invehicle_assistance" caption="Помощь в автомобиле" defMap="apa" column="INVEHICLE_ASSISTANCE" type="text"/>
+        <entity id="c03_is_card_realized" caption="Сдана карта вызова" defMap="arm03_call" column="card_realized"
+                type="boolean"/>
+        <entity id="a03_move_method_d" caption="Вид транспортировки" defMap="a03_move_method" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_a03_move_method" defMap="apa" column="ID_MOVE_METHOD"
+                        refDictionaryColumn="dic_a03_move_method_id"/>
+            <entity id="a03_move_method_d_caption" caption="Вид транспортировки наименование" column="caption" type="text"/>
+        </entity>
+    </entity>
+
+    <entity id="c03_staff" caption="Состав бригады 03">
+        <entity id="c03_staff_fio" caption="ФИО работника" defMap="rcs_staff" column="FIO" type="dictionary">
+            <dictionary ref="dic_stuff" defMap="rcs_staff" column="id" refDictionaryColumn="dic_stuff_id"/>
+        </entity>
+        <entity id="c03_staff_fio_list" caption="Простой список состава" defMap="vw_sc_staff_list" column="staffs"
+                type="text"/>
+        <entity id="c03_staff_appoint_d" caption="Должность" defMap="rcs_staff_appoin" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_rcs_staff_appoin" defMap="rcs_staff" column="ID_APPOINTMENT"
+                        refDictionaryColumn="dic_rcs_staff_appoin_id"/>
+            <entity id="c03_staff_appoint" caption="Должность наименование" defMap="rcs_staff_appoin" column="caption"
+                    type="text"/>
+            <entity id="c03_staff_appoint_code_tfoms" caption="Код специальности по ТФОМС" defMap="rcs_stf_spec_tfoms"
+                    column="code"
+                    type="text"/>
+        </entity>
+        <entity id="c03_staff_is_senior" caption="Признак старшего в бригаде" defMap="ref_call_staff" column="is_senior"
+                type="boolean"/>
+
+        <entity id="c03_staff_pult_d" caption="Служба" defMap="rcs_staff_pult" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_pult_take_call" defMap="rcs_staff" column="ID_PULT"
+                        refDictionaryColumn="dic_pult_take_call_id"/>
+            <entity id="c03_staff_pult_c" caption="Служба наименование" defMap="rcs_staff_pult" column="caption"
+                    type="text"/>
+        </entity>
+    </entity>
+
+    <entity caption="Информация по звонку" id="id_call_event_sound" defMap="ref_call_event_sound">
+        <entity id="id_ce_lAON" caption="АОН" column="AON" type="text"/>
+        <entity caption="Признак пропущенного звонка" id="id_call_event_sound_missing" column="MISSING" type="boolean"/>
+        <entity caption="Звонок пропущен и оставлено сообщение" id="id_call_event_sound_wait_msg" column="WAIT_MSG"
+                type="boolean"/>
+        <entity caption="Звонок пропущен и сообщение не оставлено" id="id_call_event_sound_no_wait_msg"
+                column="NO_WAIT_MSG" type="boolean"/>
+        <entity caption="АОН не получен" id="id_call_event_sound_no_aon" column="NO_AON" type="boolean"/>
+        <entity caption="Дата начала разговора" id="id_call_event_sound_dt_start" column="DT_START" type="dateTime"/>
+        <entity caption="Дата окончания разговора" id="id_call_event_sound_dt_stop" column="DT_STOP" type="dateTime"/>
+        <entity caption="Номер IVR" id="id_call_event_sound_ivr" column="FOR_DDS" type="number"/>
+        <entity caption="Признак исходящего звонок" id="id_call_event_sound_is_out" column="IS_OUT" type="boolean"/>
+    </entity>
+
+    <!-- 0000000000000000000000000000000000000 -->
+
+    <entity id="id_AON" caption="Информация по АОН">
+        <entity id="id_ce_AON" caption="АОН" defMap="ref_call_event_sound_aon" column="AON" type="text"/>
+        <!-- TODO нудно уточнитть что из этих полей мы можем показать, и как и достать -->
+        <!--<entity id="id_ce_aon_ADRESS" caption="Адрес"/>-->
+        <!--<entity id="id_ce_aon_CITY_NAME" caption="Город"/>-->
+        <!--<entity id="id_ce_aon_STREET_NAME" caption="Улица"/>-->
+        <!--<entity id="id_ce_aon_HOME" caption="Номер дома"/>-->
+        <!--<entity id="id_ce_aon_FLOOR" caption="Этаж"/>-->
+        <!--<entity id="id_ce_aon_FLAT" caption="Квартира"/>-->
+        <!--<entity id="id_ce_aon_ENTRANCE" caption="Подъезд"/>-->
+        <!--<entity id="id_ce_aon_KOD_ENTRANCE" caption="Код подъезда"/>-->
+        <!--<entity id="id_ce_aon_LAT" caption="Широта"/>-->
+        <!--<entity id="id_ce_aon_LON" caption="Долгота"/>-->
+        <!--<entity id="id_ce_aon_PULT_CAPTION" caption="Принадлежность подразделению, району выезда"/>-->
+        <!--<entity id="id_ce_aon_CITY_AREA" caption="района, области, края"/>-->
+    </entity>
+
+
+    <!-- TODO эти тоже пока отпустим... -->
+    <!--<entity id="id_ce_SENDED_TO_PULT"-->
+    <!--caption="Служба или подразделение на которую передали происшествие"/>-->
+
+    <!--<entity id="id_ce_ID_TRANSFER" caption="Служба на которую перевели звонок"/>-->
+
+    <!--<entity id="id_ce_ID_MAIN_CALL" caption="Основной вызов происшествия"/>-->
+
+    <!--<entity id="id_raion" caption="Район выезда, подразделение по происшествию"/>-->
+
+    <entity id="id_obj" caption="Объекты контроля" defMap="objects">
+        <entity id="id_ce_OBJECTS_DIC" caption="Объект контроля" column="CAPTION" type="dictionary">
+            <dictionary ref="dic_objects" defMap="ce" column="id_object" refDictionaryColumn="dic_objects_id"/>
+        </entity>
+        <entity id="id_ce_OBJECT_NAME" caption="Наименование объекта происшествия" column="CAPTION" type="text"/>
+        <entity id="id_ce_OBJECT_REG_NO" caption="Регистрационный номер" column="REG_NO" type="text"/>
+        <entity id="id_ce_OBJECT_IS_TESTING"
+                caption="В режиме тестирования" column="IS_TESTING" type="boolean"/>
+        <entity id="id_ce_OBJECT_IS_RETRANS" caption="Является ли ретранслятором" column="IS_RETRANS" type="boolean"/>
+        <entity id="id_ce_OBJECT_ADRESS" caption="Адрес"
+                expression="JOIN(', ', objects_ar.caption, objects_ci.caption, objects_st.caption, objects_ba.home, objects_fa.flat)"/>
+        <entity id="id_ce_OBJECT_AREA" caption="Район" defMap="objects_ar" column="caption" type="text"/>
+        <entity id="id_ce_OBJECT_CITY_NAME" caption="Город" defMap="objects_ci" column="caption" type="text"/>
+        <entity id="id_ce_OBJECT_STREET_NAME" caption="Улица" defMap="objects_st" column="caption" type="text"/>
+        <entity id="id_ce_OBJECT_HOME" caption="Номер дома" defMap="objects_ba" column="home" type="text"/>
+        <entity id="id_ce_OBJECT_FLAT" caption="Квартира" defMap="objects_fa" column="flat" type="text"/>
+        <entity id="id_ce_OBJECT_LAT" caption="Широта" column="LAT" type="number"/>
+        <entity id="id_ce_OBJECT_LON" caption="Долгота" column="LON" type="number"/>
+
+        <!-- TODO ссылка на пульт пока не используем... -->
+        <!--<entity id="id_ce_OBJECT_PULT_CAPTION"-->
+        <!--caption="Принадлежность подразделению, району выезда"/>-->
+    </entity>
+
+    <entity id="id_informer" caption="Информация о заявителе" defMap="ce">
+        <entity id="id_ce_INFORMER" caption="Заявитель" column="informer" type="text"/>
+        <entity id="id_ce_PHONE_FROM" caption="Телефон заявителя" column="phone_from" type="text"/>
+        <entity id="id_ce_inf_ADRESS" caption="Адрес" column="src_address" type="text"/>
+        <entity id="id_ce_inf_CITY_AREA" caption="Район" defMap="informer_ar" column="caption" type="text"/>
+        <entity id="id_ce_inf_CITY_NAME" caption="Город" defMap="informer_ci" column="caption" type="text"/>
+        <entity id="id_ce_inf_STREET_NAME" caption="Улица" defMap="informer_st" column="caption" type="text"/>
+        <entity id="id_ce_inf_HOME" caption="Номер дома" defMap="informer_ba" column="home" type="text"/>
+        <entity id="id_ce_inf_FLAT" caption="Квартира" column="src_flat" type="text"/>
+        <entity id="id_ce_inf_LAT" caption="Широта" column="SRC_LAT" type="number"/>
+        <entity id="id_ce_inf_LON" caption="Долгота" column="SRC_LON" type="number"/>
+
+        <!-- TODO ссылка на пульт пока не используем... -->
+        <!--<entity id="id_ce_inf_PULT_CAPTION"-->
+        <!--caption="Принадлежность подразделению, району выезда"/>-->
+    </entity>
+
+    <!-- TODO Пропускаем -->
+    <!--<entity id="id_ce_e_message" caption="Электоронное сообщения по происшествию"/>-->
+
+    <entity id="id_ACTION_DISP" caption="Действия диспетчера">
+        <entity id="id_ACTION_DISP_date" caption="Время действия" defMap="ca" column="dtime" type="dateTime"/>
+        <entity id="id_ACTION_DISP_text" caption="Действие" defMap="ca_sp" column="caption" type="text"/>
+    </entity>
+
+    <entity id="id_ACTION_REPORT" caption="Доклад">
+        <entity id="id_ACTION_REPORT_date" caption="Время доклада" defMap="ca_d" column="dtime" type="dateTime"/>
+        <entity id="id_ACTION_REPORT_doc" caption="Докладчик" defMap="ca_d" column="sender" type="text"/>
+        <entity id="id_ACTION_REPORT_text" caption="Доклад" defMap="ca_d_sp" column="caption" type="text"/>
+    </entity>
+
+    <!--    <entity id="id_01" caption="Данные по 01" defMap="ce">-->
+    <!--        <entity id="id_ce_TIME_LOC" caption="Время локализации" column="time_loc" type="dateTime"/>-->
+    <!--        <entity id="id_ce_TIME_LIKVID" caption="Время ликвидации" column="time_likvid" type="dateTime"/>-->
+    <!--        &lt;!&ndash; TODO пропускаем, т.к не промто высчитывается &ndash;&gt;-->
+    <!--        &lt;!&ndash;<entity id="id_ce_TIME_LIKVID_EFFECTS"&ndash;&gt;-->
+    <!--        &lt;!&ndash;caption="Время ликвидации последствий пожара" column="" type="dateTime"/>&ndash;&gt;-->
+    <!--    </entity>-->
+
+    <entity id="id_addr_03" caption="Адрес проживания пациента 03">
+        <entity id="id_addr_03_ADRESS" caption="Адрес" defMap="patient" column="registration_place" type="text"/>
+        <entity id="id_addr_03_CITY_AREA" caption="Район" defMap="patient_ar" column="caption" type="text"/>
+        <entity id="id_addr_03_CITY_NAME" caption="Город" defMap="patient_ci" column="caption" type="text"/>
+        <entity id="id_addr_03_STREET_NAME" caption="Улица" defMap="patient_st" column="caption" type="text"/>
+        <entity id="id_addr_03_HOME" caption="Номер дома" defMap="patient_ba" column="home" type="text"/>
+        <entity id="id_addr_03_FLAT" caption="Квартира" defMap="patient_fa" column="flat" type="text"/>
+        <entity id="id_addr_03_LAT" caption="Широта" defMap="patient_ba" column="lat" type="number"/>
+        <entity id="id_addr_03_LON" caption="Долгота" defMap="patient_ba" column="lon" type="number"/>
+    </entity>
+
+
+    <entity id="id_03_help" caption="Помощь 03" defMap="hc_help">
+        <entity id="vw_sc_help_list_usl_list" defMap="vw_sc_help_list_usl" column="help" caption="Простой список услуг"
+                type="text"/>
+        <entity id="id_03_help_d" defMap="hc_help_se" column="caption" caption="Помощь" type="dictionary">
+            <dictionary ref="dic_03_help_d" defMap="hc_help_se" column="id" refDictionaryColumn="dic_03_help_d_id"/>
+            <entity id="id_03_help_d_cap" column="caption" caption="Наименование" type="text"/>
+            <entity id="id_03_help_d_TRUD" column="trud" caption="Трудозатраты на ед." type="number"/>
+            <entity id="id_03_help_d_CODE" column="code" caption="Код ПМУ" type="text"/>
+            <entity id="id_03_help_d_cap2" column="caption2" caption="Сокращение" type="text"/>
+            <entity id="id_03_help_d_terrcode" column="terrcode" caption="Код ФОМС" type="text"/>
+        </entity>
+        <entity id="id_03_help_d_AMOUNT" caption="Количество" column="amount" type="number"/>
+        <entity id="id_03_help_d_NOTE" caption="Примечание" column="note" type="text"/>
+        <entity id="id_hc_help_place" caption="Место оказания" defMap="hc_help_place" column="caption" type="text"/>
+    </entity>
+
+    <entity id="id_03_obsl" caption="Обследования 03" defMap="hc_obsl">
+        <entity id="id_03_obsl_d" defMap="hc_obsl_se" column="caption" caption="Обследование" type="dictionary">
+            <dictionary ref="dic_03_help_d" defMap="hc_obsl_se" column="id" refDictionaryColumn="dic_03_help_d_id"/>
+            <entity id="id_03_obsl_d_cap" column="caption" caption="Наименование обследования" type="text"/>
+            <entity id="id_03_obsl_d_TRUD" column="trud" caption="Трудозатраты на ед." type="number"/>
+            <entity id="id_03_obsl_d_CODE" column="code" caption="Код обследования" type="text"/>
+            <entity id="id_03_obsl_d_cap2" column="caption2" caption="Сокращение" type="text"/>
+        </entity>
+        <entity id="id_03_obsl_d_AMOUNT" caption="Количество" column="amount" type="number"/>
+        <entity id="id_03_obsl_d_NOTE" caption="Примечание" column="note" type="text"/>
+    </entity>
+
+    <entity id="id_03_med" defMap="hc_help_med" caption="Расходованные медикаменты">
+        <entity id="id_03_med_caption" defMap="w_rfof_med_v2" column="caption" caption="Медикамент" type="text"/>
+        <entity id="id_03_med_AMOUNT" column="amount" caption="Количество" type="number"/>
+        <entity id="id_03_med_IS_DRUG_PATIENT" column="is_drug_patient" caption="ЛС пациента" type="boolean"/>
+    </entity>
+
+    <entity id="ce_disp_for_reg" caption="Диспетчер">
+        <entity id="user_ce_reg_d" caption="Диспетчер зарегистрировший вызов" defMap="user_ce_reg" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_users" defMap="ce" column="oper_reg" refDictionaryColumn="dic_users_id"/>
+            <entity id="user_ce_reg_cap" caption="Имя диспетчера зарегистрировший вызов" defMap="user_ce_reg"
+                    column="caption"
+                    type="text"/>
+        </entity>
+        <entity id="user_tex_send_call_ev_d" caption="Диспетче передавший вызов" defMap="dsp_send_ca_u" column="caption"
+                type="dictionary">
+            <dictionary ref="dic_users" defMap="dsp_send_ca" column="user_id" refDictionaryColumn="dic_users_id"/>
+            <entity id="user_tex_send_call_ev" defMap="dsp_send_ca_u" column="caption" type="text"
+                    caption="Диспетче передавший вызов"/>
+        </entity>
+        <entity id="user_tex_b_send_cap" defMap="user_tex_b_send" column="caption" type="text"
+                caption="Диспетче отправивший бригаду"/>
+        <entity id="user_tex_t_send_cap" defMap="user_tex_t_send" column="caption" type="text"
+                caption="Диспетче отправивший технику"/>
+        <entity id="user_fill_dop_talon_cap" defMap="user_fill_dop_talon" column="caption" type="text"
+                caption="Диспетчер заполнивший КТС 03"/>
+        <entity id="user_retreat_cap" defMap="user_retreat" column="caption" type="text"
+                caption="Диспетчер завершивший вызов"/>
+    </entity>
+
+    <entity id="a03_ev_hospital" caption="Ошибки маршрутизации в ЛПУ">
+        <entity id="a03_ev_hospital_is_error" caption="Признак ошибки маршрутизации" defMap="a03_ev_hospital_sync_info"
+                expression="
+                   CASE(0, WHEN(IS_NOT_NULL(a03_ev_hospital_sync_info.id_call), 1))" type="boolean"/>
+        <entity id="a03_ev_hospital_caption" caption="Описание ошибки маршрутизации" defMap="a03_ev_hospital_sync_info"
+                column="violation_comment" type="text"/>
+    </entity>
+
+    <entity id="ref_pult" caption="Карточка происшествия на других службах">
+        <entity id="ref_pult_d" caption="Служба" defMap="rpe_pult" column="caption" type="dictionary">
+            <dictionary ref="dic_pult_remoute" defMap="ref_pult_event" column="server_cid"
+                        refDictionaryColumn="dic_pult_remoute_id"/>
+            <entity id="ref_pult_scope_d" caption="Тип службы" defMap="rpe_pult_scope" column="caption" type="dictionary">
+                <dictionary ref="dic_pult_scope" defMap="rpe_pult" column="id_scope"
+                            refDictionaryColumn="dic_pult_scope_id"/>
+            </entity>
+            <entity id="ref_pult_remoute_id" caption="Идентификатор происшествия" defMap="ref_pult_event" column="remote_id" type="number"/>
+        </entity>
+    </entity>
+
+    <dictionaryLink id="dic_src_et" caption="Тип источника вызова" key="dic_src_et_id">
+        <dictColumn id="dic_src_et_id" caption="Код" defMap="src_et" column="id"/>
+        <dictColumn id="dic_src_et_caption" caption="Расшифровка" defMap="src_et" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_rank" caption="Тип происшествия" key="dic_rank_id">
+        <dictColumn id="dic_rank_id" visible="false" caption="Идентификтор" defMap="rank" column="id"/>
+        <dictColumn id="dic_rank_caption" caption="Расшифровка" defMap="rank" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_event_type" caption="Вид происшествия" key="dic_event_type_id">
+        <dictColumn id="dic_event_type_id" visible="false" caption="Идентификтор" defMap="event_type" column="id"/>
+        <dictColumn id="dic_event_type_caption" caption="Расшифровка" defMap="event_type" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_category_call" caption="Категория вызова" key="dic_a03_category_call_id"
+                    restriction="EQ(a03_category_call.deleted,0)">
+        <dictColumn id="dic_a03_category_call_id" visible="false" caption="Идентификтор" defMap="a03_category_call"
+                    column="id"/>
+        <dictColumn id="dic_a03_category_call_caption" caption="Расшифровка" defMap="a03_category_call"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_assistance_efficiency" caption="Изменения состояния пациента"
+                    key="dic_a03_assistance_efficiency_id"
+                    restriction="EQ(arm03_assistance_efficiency.deleted,0)">
+        <dictColumn id="dic_a03_assistance_efficiency_id" visible="false" caption="Идентификтор"
+                    defMap="arm03_assistance_efficiency"
+                    column="id"/>
+        <dictColumn id="dic_a03_assistance_efficiency_caption" caption="Расшифровка"
+                    defMap="arm03_assistance_efficiency"
+                    column="caption"/>
+    </dictionaryLink>
+
+
+    <!-- 0000000000000000000000000000000000000 -->
+
+    <dictionaryLink id="dic_hospital" caption="ЛПУ" restriction="EQ(hospital.deleted, 0)" key="dic_hospital_id">
+        <dictColumn id="dic_hospital_id" visible="false" caption="Идентификатор" defMap="hospital" column="id"/>
+        <dictColumn id="dic_hospital_caption" caption="Наименование" defMap="hospital" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_users" caption="Пользователи" restriction="EQ(user_ce_reg.is_active, 1)" key="dic_users_id">
+        <dictColumn id="dic_users_id" visible="false" caption="Идентификатор" defMap="user_ce_reg" column="id"/>
+        <dictColumn id="dic_users_caption" caption="Имя" defMap="user_ce_reg" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_hospital_type" caption="Тип ЛПУ" restriction="EQ(hospital_type.deleted, 0)"
+                    key="dic_hospital_type_id">
+        <dictColumn id="dic_hospital_type_id" visible="false" caption="Идентификатор" defMap="hospital_type"
+                    column="id"/>
+        <dictColumn id="dic_hospital_type_caption" caption="Наименование" defMap="hospital_type" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_icd10" caption="МКБ 10" restriction="EQ(icd10_primary.deleted,0)" key="dic_icd10_id">
+        <dictColumn id="dic_icd10_id" visible="false" caption="Идентификатор" defMap="icd10_primary" column="id"/>
+        <dictColumn id="dic_icd10_code" caption="Код" defMap="icd10_primary" column="code"/>
+        <dictColumn id="dic_icd10_caption" caption="Расшифровка" defMap="icd10_primary" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_arm03_departure_cause" caption="Причина НС" restriction="EQ(a03_depa_cause.deleted, 0)"
+                    key="dic_arm03_departure_cause_id">
+        <dictColumn id="dic_arm03_departure_cause_id" visible="false" caption="Идентификатор" defMap="a03_depa_cause"
+                    column="id"/>
+        <dictColumn id="dic_arm03_departure_cause_caption" caption="Наименование" defMap="a03_depa_cause"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_arm03_accident_cause" caption="Причина НС" restriction="EQ(a03_acci_cause.deleted, 0)"
+                    key="dic_arm03_departure_cause_id">
+        <dictColumn id="dic_arm03_accident_cause_id" visible="false" caption="Идентификатор" defMap="a03_acci_cause"
+                    column="id"/>
+        <dictColumn id="dic_arm03_accident_cause_caption" caption="Наименование" defMap="a03_acci_cause"
+                    column="caption"/>
+    </dictionaryLink>
+
+
+    <dictionaryLink id="dic_arm03_departure_result" caption="Результат вызова"
+                    restriction="EQ(a03_depa_result.deleted, 0)"
+                    key="dic_arm03_departure_result_id">
+        <dictColumn id="dic_arm03_departure_result_id" visible="false" caption="Идентификатор" defMap="a03_depa_result"
+                    column="id"/>
+        <dictColumn id="dic_arm03_departure_result_caption" caption="Наименование" defMap="a03_depa_result"
+                    column="caption"/>
+    </dictionaryLink>
+
+
+    <dictionaryLink id="dic_stuff" caption="Персонал" restriction="EQ(vw_staff.isdelete,0)" key="dic_stuff_id">
+        <dictColumn id="dic_stuff_id" visible="false" caption="Идентификатор" defMap="vw_staff" column="id"/>
+        <dictColumn id="dic_stuff_caption" caption="Ф.И.О. работника" defMap="vw_staff" column="fio"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_rcs_staff_appoin" caption="Должности" restriction="EQ(rcs_staff_appoin.DELETED,0)"
+                    key="dic_stuff_id">
+        <dictColumn id="dic_rcs_staff_appoin_id" visible="false" caption="Идентификатор" defMap="rcs_staff_appoin"
+                    column="id"/>
+        <dictColumn id="dic_rcs_staff_appoin_caption" caption="Должность" defMap="rcs_staff_appoin" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_brig" caption="Бригада"
+                    restriction="AND(EQ(ct_brigade.is_brigade, 1), EQ(ct_brigade.is_active, 1))"
+                    key="dic_brig_id">
+        <dictColumn id="dic_brig_id" caption="Идентификатор" visible="false" defMap="ct_brigade" column="id"/>
+        <dictColumn id="dic_brig_caption" caption="Бригада" visible="true" defMap="ct_brigade" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_technika" caption="Техника"
+                    restriction="AND(EQ(ct_technika.is_brigade, 0), EQ(ct_technika.is_active, 1))"
+                    key="dic_technika_id">
+        <dictColumn id="dic_technika_id" caption="Идентификатор" visible="false" defMap="ct_technika" column="id"/>
+        <dictColumn id="dic_technika_caption" caption="Бригада" visible="true" defMap="ct_technika" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_age_pat" caption="Возрастная группа" key="dic_age_pat_id">
+        <dictColumn id="dic_age_pat_id" visible="false" caption="Идентификатор" defMap="age_group_for_dic" column="id"/>
+        <dictColumn id="dic_age_pat_caption" visible="true" caption="Группа" defMap="age_group_for_dic"
+                    column="caption"/>
+        <dictColumn id="dic_age_pat_min_age" visible="false" caption="Идентификатор" defMap="age_group_for_dic"
+                    column="min_age"/>
+        <dictColumn id="dic_age_pat_max_age" visible="false" caption="Идентификатор" defMap="age_group_for_dic"
+                    column="max_age"/>
+        <dictColumn id="dic_age_pat_sex" visible="false" caption="Идентификатор" defMap="age_group_for_dic"
+                    column="sex"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_03_help_d" caption="Помощь пострадавшим" key="dic_03_help_d_id"
+                    restriction="EQ(hc_help_se.deleted, 0)">
+        <dictColumn id="dic_03_help_d_id" visible="false" caption="Идентификатор" defMap="hc_help_se" column="id"/>
+        <dictColumn id="dic_03_help_d_code" caption="Код" defMap="hc_help_se" column="code"/>
+        <dictColumn id="dic_03_help_d_caption" caption="Описание" defMap="hc_help_se" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_doc_type_d" caption="Типы документов" key="dic_doc_type_d_id"
+                    restriction="EQ(patient_doc_type.deleted, 0)">
+        <dictColumn id="dic_doc_type_d_id" visible="false" caption="Идентификатор" defMap="patient_doc_type"
+                    column="id"/>
+        <dictColumn id="dic_doc_type_d_code" caption="Код" defMap="patient_doc_type" column="code"/>
+        <dictColumn id="dic_doc_type_d_caption" caption="Описание" defMap="patient_doc_type" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_country_only_d" caption="Страны" key="dic_country_only_d_id"
+                    restriction="AND(EQ(country_tree_coun.deleted, 0), EQ(country_tree_coun.discriminator, 'COUNTRY'))">
+        <dictColumn id="dic_country_only_d_id" visible="false" caption="Идентификатор" defMap="country_tree_coun"
+                    column="id"/>
+        <dictColumn id="dic_country_only_d_caption" caption="Описание" defMap="country_tree_coun" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_country_sub_d" caption="Субъекты" key="dic_country_sub_d_id"
+                    restriction="AND(EQ(country_tree_reg.deleted, 0), EQ(country_tree_reg.discriminator, 'Subekti'))">
+        <dictColumn id="dic_country_sub_d_id" visible="false" caption="Идентификатор" defMap="country_tree_reg"
+                    column="id"/>
+        <dictColumn id="dic_country_sub_d_caption" caption="Описание" defMap="country_tree_reg" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_arm03_vpolis" caption="Тип полиса" key="dic_arm03_vpolis_id"
+                    restriction="AND(EQ(arm03_vpolis.deleted, 0),EQ(arm03_vpolis.visible, 1))">
+        <dictColumn id="dic_arm03_vpolis_id" visible="false" caption="Идентификатор" defMap="arm03_vpolis" column="id"/>
+        <dictColumn id="dic_arm03_vpolis_caption" caption="Описание" defMap="arm03_vpolis" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_departure_delay_cause" caption="Тип полиса" key="dic_departure_delay_cause_id"
+                    restriction="AND(EQ(arm03_departure_delay_cause.deleted, 0),EQ(arm03_departure_delay_cause.visible, 1))">
+        <dictColumn id="dic_departure_delay_cause_id" visible="false" caption="Идентификатор" defMap="arm03_vpolis"
+                    column="id"/>
+        <dictColumn id="dic_departure_delay_cause_caption" caption="Описание" defMap="arm03_vpolis" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_pult_remoute" caption="Подразделения" key="dic_pult_remoute_id"
+                    restriction="AND(EQ(pult_own_call.deleted, 0))">
+        <dictColumn id="dic_pult_remoute_id" visible="false" caption="Идентификатор" defMap="pult_own_call"
+                    column="id"/>
+        <dictColumn id="dic_pult_remoute_caption" caption="Описание" defMap="pult_own_call" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_pult_take_call" caption="Подразделения" key="dic_pult_take_call_id"
+                    restriction="AND(EQ(pult_take_call.deleted, 0), EQ(pult_take_call.remote, 0), EQ(pult_take_call.id_type, 1))">
+        <dictColumn id="dic_pult_take_call_id" visible="false" caption="Идентификатор" defMap="pult_take_call"
+                    column="id"/>
+        <dictColumn id="dic_pult_take_call_caption" caption="Описание" defMap="pult_take_call" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_ct_brigade_pult" caption="Подразделения" key="dic_ct_brigade_pult_id"
+                    restriction="AND(EQ(ct_brigade_pult.deleted, 0))">
+        <dictColumn id="dic_ct_brigade_pult_id" visible="false" caption="Идентификатор" defMap="ct_brigade_pult"
+                    column="id"/>
+        <dictColumn id="dic_ct_brigade_pult_caption" caption="Описание" defMap="ct_brigade_pult" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_ct_br_tt" caption="Подразделения" key="dic_ct_br_tt_id"
+                    restriction="AND(EQ(ct_br_tt.deleted, 0), EQ(ct_br_tt.visible, 1))">
+        <dictColumn id="dic_ct_br_tt_id" visible="false" caption="Идентификатор" defMap="ct_br_tt" column="id"/>
+        <dictColumn id="dic_ct_br_tt_caption" caption="Описание" defMap="ct_br_tt" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_area" caption="Районы" key="dic_area_id">
+        <dictColumn id="dic_area_id" visible="false" caption="Идентификатор" defMap="ce_ar" column="id"/>
+        <dictColumn id="dic_area_caption" caption="Наименование" defMap="ce_ar" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_objects" caption="Объекты" key="dic_objects_id"
+                    restriction="AND(EQ(objects.deleted, 0), EQ(objects.categorized, 1))">
+        <dictColumn id="dic_objects_id" visible="false" caption="Идентификатор" defMap="objects" column="id"/>
+        <dictColumn id="dic_objects_caption" caption="Наименование" defMap="objects" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_root_duty_shift_plan" caption="Типы смен" key="dic_root_duty_shift_plan_id">
+        <dictColumn id="dic_root_duty_shift_plan_id" visible="false" caption="Идентификатор"
+                    defMap="duty_shift_plan_root_brig" column="id"/>
+        <dictColumn id="dic_root_duty_shift_plan_caption" caption="Наименование" defMap="duty_shift_plan_root_brig"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_category_patient_d" caption="Категория пациента" key="dic_category_patient_d_id">
+        <dictColumn id="dic_category_patient_d_id" visible="false" caption="Идентификатор"
+                    defMap="a03_category_patient" column="id"/>
+        <dictColumn id="dic_category_patient_d_caption" caption="Наименование" defMap="a03_category_patient"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_smo" caption="СМО" key="dic_smo_id"
+                    restriction="AND(EQ(a03_insurance_company.deleted, 0), EQ(a03_insurance_company.visible, 1))">
+        <dictColumn id="dic_smo_id" visible="false" caption="Идентификатор" defMap="a03_insurance_company" column="id"/>
+        <dictColumn id="dic_smo_caption" caption="Наименование" defMap="a03_insurance_company" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_move_method" caption="Вид транспортировки" key="dic_a03_move_method_id"
+                    restriction="AND(EQ(a03_move_method.deleted, 0), EQ(a03_move_method.visible, 1))">
+        <dictColumn id="dic_a03_move_method_id" visible="false" caption="Идентификатор" defMap="a03_move_method" column="id"/>
+        <dictColumn id="dic_a03_move_method_caption" caption="Наименование" defMap="a03_move_method" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryEmbedded id="dic_emb_period_type" caption="Период" dictionaryWithoutAnchor="true">
+        <description key="dic_emb_period_type_id">
+            <dictColumn id="dic_emb_period_type_id" caption="Идентификатор" visible="false"/>
+            <dictColumn id="dic_emb_period_type_caption" caption="Период" visible="true"/>
+        </description>
+        <records>
+            <record>
+                <column name="dic_emb_period_type_id" value="1"/>
+                <column name="dic_emb_period_type_caption" value="День"/>
+            </record>
+            <record>
+                <column name="dic_emb_period_type_id" value="2"/>
+                <column name="dic_emb_period_type_caption" value="Неделя"/>
+            </record>
+            <record>
+                <column name="dic_emb_period_type_id" value="3"/>
+                <column name="dic_emb_period_type_caption" value="Месяц"/>
+            </record>
+            <record>
+                <column name="dic_emb_period_type_id" value="4"/>
+                <column name="dic_emb_period_type_caption" value="Квартал"/>
+            </record>
+            <record>
+                <column name="dic_emb_period_type_id" value="5"/>
+                <column name="dic_emb_period_type_caption" value="Полугодие"/>
+            </record>
+            <record>
+                <column name="dic_emb_period_type_id" value="6"/>
+                <column name="dic_emb_period_type_caption" value="Год"/>
+            </record>
+        </records>
+    </dictionaryEmbedded>
+
+    <dictionaryEmbedded id="dic_emb_sex" caption="Пол">
+        <description key="dic_emb_sex_id">
+            <dictColumn id="dic_emb_sex_id" caption="Идентификатор" visible="false"/>
+            <dictColumn id="dic_emb_sex_caption" caption="Пол" visible="true"/>
+        </description>
+        <records>
+            <record>
+                <column name="dic_emb_sex_id" value="1"/>
+                <column name="dic_emb_sex_caption" value="Мужской"/>
+            </record>
+            <record>
+                <column name="dic_emb_sex_id" value="2"/>
+                <column name="dic_emb_sex_caption" value="Женский"/>
+            </record>
+            <record>
+                <column name="dic_emb_sex_id" value="0"/>
+                <column name="dic_emb_sex_caption" value="Не определен"/>
+            </record>
+        </records>
+    </dictionaryEmbedded>
+
+    <!-- ТЦМК -->
+
+    <dictionaryLink id="dic_arm03_cmc_patient_category" caption="Категория пациента ТЦМК"
+                    key="dic_arm03_cmc_patient_category_id"
+                    restriction="AND(EQ(a03_cmc_patient_category.deleted, 0),EQ(a03_cmc_patient_category.visible, 1))">
+        <dictColumn id="dic_arm03_cmc_patient_category_id" visible="false" caption="Идентификатор"
+                    defMap="a03_cmc_patient_category" column="id"/>
+        <dictColumn id="dic_arm03_cmc_patient_category_caption" caption="Описание" defMap="a03_cmc_patient_category"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_medical_profile" caption="Профиль мед. помощи"
+                    key="dic_medical_profile_id"
+                    restriction="EQ(medical_profile.deleted, 0)">
+        <dictColumn id="dic_medical_profile_id" visible="false" caption="Идентификатор"
+                    defMap="medical_profile" column="id"/>
+        <dictColumn id="dic_medical_profile_caption" caption="Описание" defMap="medical_profile"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_cmc_decision" caption="Категория пациента ТЦМК" key="dic_a03_cmc_decision_id"
+                    restriction="AND(EQ(a03_cmc_decision.deleted, 0),EQ(a03_cmc_decision.visible, 1))">
+        <dictColumn id="dic_a03_cmc_decision_id" visible="false" caption="Идентификатор" defMap="a03_cmc_decision"
+                    column="id"/>
+        <dictColumn id="dic_a03_cmc_decision_caption" caption="Описание" defMap="a03_cmc_decision" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_cmc_responsible_org" caption="Категория пациента ТЦМК"
+                    key="dic_a03_cmc_responsible_org_id"
+                    restriction="AND(EQ(a03_cmc_responsible_org.deleted, 0),EQ(a03_cmc_responsible_org.visible, 1))">
+        <dictColumn id="dic_a03_cmc_responsible_org_id" visible="false" caption="Идентификатор"
+                    defMap="a03_cmc_responsible_org" column="id"/>
+        <dictColumn id="dic_a03_cmc_responsible_org_caption" caption="Описание" defMap="a03_cmc_responsible_org"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_cmc_result" caption="Категория пациента ТЦМК" key="dic_a03_cmc_result_id"
+                    restriction="AND(EQ(a03_cmc_result.deleted, 0),EQ(a03_cmc_result.visible, 1))">
+        <dictColumn id="dic_a03_cmc_result_id" visible="false" caption="Идентификатор" defMap="a03_cmc_result"
+                    column="id"/>
+        <dictColumn id="dic_a03_cmc_result_caption" caption="Описание" defMap="a03_cmc_result" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_cmc_category" caption="Категория пациента ТЦМК" key="dic_a03_cmc_category_id"
+                    restriction="AND(EQ(a03_cmc_category.deleted, 0),EQ(a03_cmc_category.visible, 1))">
+        <dictColumn id="dic_a03_cmc_category_id" visible="false" caption="Идентификатор" defMap="a03_cmc_category"
+                    column="id"/>
+        <dictColumn id="dic_a03_cmc_category_caption" caption="Описание" defMap="a03_cmc_category" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_a03_cmc_evacuation_type" caption="Категория пациента ТЦМК"
+                    key="dic_a03_cmc_evacuation_type_id"
+                    restriction="AND(EQ(a03_cmc_evacuation_type.deleted, 0),EQ(a03_cmc_evacuation_type.visible, 1))">
+        <dictColumn id="dic_a03_cmc_evacuation_type_id" visible="false" caption="Идентификатор"
+                    defMap="a03_cmc_evacuation_type" column="id"/>
+        <dictColumn id="dic_a03_cmc_evacuation_type_caption" caption="Описание" defMap="a03_cmc_evacuation_type"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_aviation_company" caption="Категория пациента ТЦМК" key="dic_aviation_company_id">
+        <dictColumn id="dic_aviation_company_id" visible="false" caption="Идентификатор" defMap="cmc_aviation_company"
+                    column="id"/>
+        <dictColumn id="dic_aviation_company_caption" caption="Описание" defMap="cmc_aviation_company"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_tech_type_avia" caption="Авиа техника" key="dic_tech_type_avia_id"
+                    restriction="AND(EQ(cmc_tech_type_avia.deleted, 0), EQ(cmc_tech_type_avia.visible, 1), EQ(cmc_tech_type_avia.is_avia, 1))">
+        <dictColumn id="dic_tech_type_avia_id" visible="false" caption="Идентификатор" defMap="cmc_tech_type_avia"
+                    column="id"/>
+        <dictColumn id="dic_tech_type_avia_caption" caption="Наименование" defMap="cmc_tech_type_avia"
+                    column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_city" caption="Города" key="dic_city_id"
+                    restriction="AND(EQ(ce_direct_city.deleted, 0),EQ(ce_direct_city.visible, 1))">
+        <dictColumn id="dic_city_id" visible="false" caption="Идентификатор" defMap="ce_direct_city" column="id"/>
+        <dictColumn id="dic_city_caption" caption="Наименование" defMap="ce_direct_city" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_ce_rere" caption="Причина завршения вызова" key="dic_ce_rere_id">
+        <dictColumn id="dic_ce_rere_id" visible="false" caption="Идентификатор" defMap="ce_rere" column="id"/>
+        <dictColumn id="dic_ce_rere_caption" caption="Наименование" defMap="ce_rere" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_c03_ist_fin" caption="Источник финансирования" key="dic_c03_ist_fin_id">
+        <dictColumn id="dic_c03_ist_fin_id" visible="false" caption="Идентификатор" defMap="a03_ist_fin" column="id"/>
+        <dictColumn id="dic_c03_ist_fin_caption" caption="Наименование" defMap="a03_ist_fin" column="caption"/>
+    </dictionaryLink>
+
+    <dictionaryLink id="dic_pult_scope" caption="Тип службы" key="dic_pult_scope_id">
+        <dictColumn id="dic_pult_scope_id" visible="false" caption="Идентификатор" defMap="rpe_pult_scope" column="id"/>
+        <dictColumn id="dic_pult_scope_caption" caption="Наименование" defMap="rpe_pult_scope" column="caption"/>
+    </dictionaryLink>
+
+
+    <entity id="cmc_root" caption="ТЦМК">
+        <entity id="cmc_cat_pat_d" defMap="a03_cmc_patient_category" column="caption" type="dictionary"
+                caption="Категория пациента">
+            <dictionary ref="dic_arm03_cmc_patient_category" defMap="a03_cmc_accident" column="id_patient_category"
+                        refDictionaryColumn="dic_arm03_cmc_patient_category_id"/>
+            <entity id="cmc_cat_pat_cap" defMap="a03_cmc_patient_category" column="caption" type="text"
+                    caption="Категория пациента наименование"/>
+        </entity>
+        <entity id="cmc_med_pro_d" defMap="medical_profile" column="caption" type="dictionary"
+                caption="Профиль мед. помощи">
+            <dictionary ref="dic_medical_profile" defMap="a03_cmc_accident" column="id_medical_profile"
+                        refDictionaryColumn="dic_medical_profile_id"/>
+            <entity id="cmc_med_pro_cap" defMap="medical_profile" column="caption" type="text"
+                    caption="Профиль мед. помощи наименование"/>
+        </entity>
+        <entity id="cmc_decision_d" defMap="a03_cmc_decision" column="caption" type="dictionary" caption="Решение">
+            <dictionary ref="dic_a03_cmc_decision" defMap="a03_cmc_accident" column="id_decision"
+                        refDictionaryColumn="dic_a03_cmc_decision_id"/>
+            <entity id="cmc_decision_cap" defMap="a03_cmc_decision" column="caption" type="text"
+                    caption="Решение наименование"/>
+        </entity>
+        <entity id="cmc_responsible_d" defMap="a03_cmc_responsible_org" column="caption" type="dictionary"
+                caption="Кто выполнил">
+            <dictionary ref="dic_a03_cmc_responsible_org" defMap="a03_cmc_accident" column="id_responsible"
+                        refDictionaryColumn="dic_a03_cmc_responsible_org_id"/>
+            <entity id="cmc_responsible_cap" defMap="a03_cmc_responsible_org" column="caption" type="text"
+                    caption="Кто выполнил наименование"/>
+        </entity>
+        <entity id="cmc_result_d" defMap="a03_cmc_result" column="caption" type="dictionary"
+                caption="Исход заболевания">
+            <dictionary ref="dic_a03_cmc_result" defMap="a03_cmc_accident" column="id_result"
+                        refDictionaryColumn="dic_a03_cmc_result_id"/>
+            <entity id="cmc_result_cap" defMap="a03_cmc_result" column="caption" type="text"
+                    caption="Исход заболевания наименование"/>
+        </entity>
+        <entity id="cmc_category_d" defMap="a03_cmc_category" column="caption" type="dictionary"
+                caption="Категория ТЦМК">
+            <dictionary ref="dic_a03_cmc_category" defMap="a03_cmc_accident" column="id_category"
+                        refDictionaryColumn="dic_a03_cmc_category_id"/>
+            <entity id="cmc_category_cap" defMap="a03_cmc_category" column="caption" type="text"
+                    caption="Категория ТЦМК наименование"/>
+        </entity>
+
+        <entity id="cmc_source_hospital_d" defMap="a03_cmc_source_hospital" column="caption" type="dictionary"
+                caption="ЛПУ">
+            <dictionary ref="dic_hospital" defMap="a03_cmc_accident" column="id_source_hospital"
+                        refDictionaryColumn="dic_hospital_id"/>
+            <entity id="cmc_source_hospital_cap" defMap="a03_cmc_source_hospital" column="caption" type="text"
+                    caption="ЛПУ наименование"/>
+            <entity id="cmc_source_hospital_name_c" defMap="a03_cmc_accident" column="source_hospital_name" type="text"
+                    caption="ЛПУ по карте"/>
+        </entity>
+
+        <entity id="cmc_accepting_hospital_d" defMap="a03_cmc_accepting_hospital" column="caption" type="dictionary"
+                caption="ЛПУ место предоставлено">
+            <dictionary ref="dic_hospital" defMap="a03_cmc_accident" column="id_accepting_hospital"
+                        refDictionaryColumn="dic_hospital_id"/>
+            <entity id="cmc_accepting_hospital_cap" defMap="a03_cmc_accepting_hospital" column="caption" type="text"
+                    caption="ЛПУ место предоставлено наименование"/>
+            <entity id="a03_cmc_accepting_hospital_type_cap" defMap="a03_cmc_accepting_hospital_type" column="caption"
+                    type="text" caption="ЛПУ место предоставлено тип"/>
+        </entity>
+
+        <entity id="cmc_accepted_hospital_d" defMap="a03_cmc_accepted_hospital" column="caption" type="dictionary"
+                caption="ЛПУ куда доставлен">
+            <dictionary ref="dic_hospital" defMap="a03_cmc_accident" column="id_accepted_hospital"
+                        refDictionaryColumn="dic_hospital_id"/>
+            <entity id="cmc_accepted_hospital_cap" defMap="a03_cmc_accepted_hospital" column="caption" type="text"
+                    caption="ЛПУ куда доставлен наименование"/>
+        </entity>
+
+        <entity id="cmc_hospital_time_c" defMap="a03_cmc_accident" column="hospital_time" type="dateTime"
+                caption="Время поступления в ЛПУ"/>
+        <entity id="cmc_removed_from_registry_date_c" defMap="a03_cmc_accident" column="removed_from_registry_date"
+                type="dateTime" caption="Дата снятия с учета"/>
+        <entity id="cmc_flight_duration_in_minutes_c" defMap="a03_cmc_accident" column="flight_duration_in_minutes"
+                type="number" caption="Налет (мин.)"/>
+        <entity id="cmc_flight_departure_count_c" defMap="a03_cmc_accident" column="departure_count" type="number"
+                caption="Выездов"/>
+        <entity id="cmc_flight_flight_count_c" defMap="a03_cmc_accident" column="flight_count" type="number"
+                caption="Вылетов"/>
+
+
+        <!--        <entity id="cmc_accepted_hospital_name_c" defMap="a03_cmc_accident" column="accepting_hospital_name" type="text" caption="ЛПУ2 по карте ?"/>-->
+        <!--        <entity id="cmc_accepting_hospital_name_c" defMap="a03_cmc_accident" column="accepted_hospital_name" type="text" caption="ЛПУ3 по карте ?"/>-->
+
+        <entity id="cmc_hospital_diagnosis_c" defMap="a03_cmc_accident" column="hospital_diagnosis" type="text"
+                caption="Диагноз в ЛПУ по карте"/>
+        <entity id="cmc_primary_diagnosis_c" defMap="a03_cmc_accident" column="primary_diagnosis" type="text"
+                caption="Основной диагноз по карте"/>
+        <entity id="cmc_secondary_diagnosis_c" defMap="a03_cmc_accident" column="secondary_diagnosis" type="text"
+                caption="Сопутствующий диагноз по карте"/>
+        <!--        <entity id="cmc_icd10_diagnosis_c" defMap="a03_cmc_accident" column="icd10_diagnosis" type="text" caption="Диагноз icd10 по карте ?"/>-->
+        <entity id="cmc_patient_address_c" defMap="a03_cmc_accident" column="patient_address" type="text"
+                caption="Место проживания больного"/>
+        <entity id="cmc_patient_flat_c" defMap="a03_cmc_accident" column="patient_flat" type="text" caption="Квартира"/>
+
+        <entity id="cmc_has_operation_c" defMap="a03_cmc_accident" column="has_operation" type="boolean"
+                caption="Признак операции"/>
+        <entity id="cmc_has_reanimation_c" defMap="a03_cmc_accident" column="has_reanimation" type="boolean"
+                caption="Признак реанимационных мероприятий"/>
+        <entity id="cmc_has_lung_ventilation_c" defMap="a03_cmc_accident" column="has_lung_ventilation" type="boolean"
+                caption="Признак ИВЛ"/>
+        <entity id="cmc_has_therapy_c" defMap="a03_cmc_accident" column="has_therapy" type="boolean"
+                caption="Признак интенсивной терапии"/>
+        <entity id="cmc_is_road_accident_c" defMap="a03_cmc_accident" column="is_road_accident" type="boolean"
+                caption="Признак дорожного происшествия"/>
+
+        <entity id="cmc_phone_consult_count_c" defMap="a03_cmc_accident" column="phone_consult_count" type="number"
+                caption="Количество телефооных консультаций"/>
+        <entity id="cmc_conference_count_c" defMap="a03_cmc_accident" column="conference_count" type="number"
+                caption="Количество ВКС"/>
+
+        <entity id="cmc_evacuation_type_d" defMap="a03_cmc_evacuation_type" column="caption" type="dictionary"
+                caption="Тип эвакуации">
+            <dictionary ref="dic_a03_cmc_evacuation_type" defMap="a03_cmc_accident" column="id_evacuation_type"
+                        refDictionaryColumn="dic_a03_cmc_evacuation_type_id"/>
+            <entity id="cmc_evacuation_type_cap" defMap="a03_cmc_evacuation_type" column="caption" type="text"
+                    caption="Тип эвакуации наименование"/>
+        </entity>
+
+        <entity id="cmc_a03_cmc_aviation_task" caption="Задание на полет">
+            <entity id="cmc_aviation_task_id" defMap="a03_cmc_aviation_task" column="id" caption="Идентификатор задания"
+                    type="number"/>
+            <entity id="cmc_aviation_task_dtime" defMap="a03_cmc_aviation_task" column="dtime" type="dateTime"
+                    caption="Дата начала задания"/>
+            <entity id="cmc_aviation_finish_time" defMap="a03_cmc_aviation_task" column="finish_time" type="dateTime"
+                    caption="Дата окончание задания"/>
+            <entity id="cmc_aviation_task_number" defMap="a03_cmc_aviation_task" column="task_number" type="number"
+                    caption="Номер задания"/>
+            <entity id="cmc_aviation_plane_numer" defMap="a03_cmc_aviation_task" column="plane_numer" type="number"
+                    caption="Номер борта"/>
+
+            <entity id="cmc_aviation_company_d" defMap="cmc_aviation_company" column="caption" type="dictionary"
+                    caption="Авиа компания">
+                <dictionary ref="dic_aviation_company" defMap="a03_cmc_aviation_task" column="id_company"
+                            refDictionaryColumn="dic_aviation_company_id"/>
+                <entity id="cmc_aviation_company_c" defMap="cmc_aviation_company" column="caption" type="text"
+                        caption="Авиа компания наименование"/>
+            </entity>
+            <entity id="cmc_tech_type_avia_d" defMap="cmc_tech_type_avia" column="caption" type="dictionary"
+                    caption="Тип техники">
+                <dictionary ref="dic_tech_type_avia" defMap="a03_cmc_aviation_task" column="id_tech_type"
+                            refDictionaryColumn="dic_tech_type_avia_id"/>
+                <entity id="cmc_tech_type_avia_c" defMap="cmc_tech_type_avia" column="caption" type="text"
+                        caption="Тип техники наименование"/>
+            </entity>
+            <entity id="user_cmc_aviation_task_c" defMap="user_cmc_aviation_task" column="caption" type="text"
+                    caption="Пользователь содавший задание на вылет"/>
+
+            <entity id="a03_aviation_task_route" caption="Пути">
+                <entity id="a03_aviation_task_route_dtime" defMap="a03_aviation_task_route" column="dtime"
+                        type="dateTime" caption="Время создания"/>
+                <entity id="a03_aviation_task_route_start_time" defMap="a03_aviation_task_route" column="start_time"
+                        type="dateTime" caption="Время начала"/>
+                <entity id="a03_aviation_task_route_finish_time" defMap="a03_aviation_task_route" column="finish_time"
+                        type="dateTime" caption="Время окончания"/>
+                <entity id="user_cmc_aviation_task_route_c" defMap="user_cmc_aviation_task_route" column="caption"
+                        type="text" caption="Пользователь"/>
+                <entity id="cmc_aviation_task_route_city_start_d" defMap="cmc_aviation_task_route_city_start"
+                        column="caption" type="dictionary" caption="Место отправления">
+                    <dictionary ref="dic_city" defMap="a03_aviation_task_route" column="id_city_start"
+                                refDictionaryColumn="dic_city_id"/>
+                </entity>
+                <entity id="cmc_aviation_task_route_city_end_d" defMap="cmc_aviation_task_route_city_end"
+                        column="caption" type="dictionary" caption="Место прибытия">
+                    <dictionary ref="dic_city" defMap="a03_aviation_task_route" column="id_city_end"
+                                refDictionaryColumn="dic_city_id"/>
+                </entity>
+                <entity id="a03_aviation_route_passenger" caption="Пасажиры" defMap="a03_aviation_route_passenger"
+                        expression="JOIN(' ', a03_aviation_route_passenger.last_name, a03_aviation_route_passenger.first_name,  a03_aviation_route_passenger.middle_name)"
+                        type="text">
+                    <entity id="a03_aviation_route_passenger_last_name" defMap="a03_aviation_route_passenger"
+                            column="last_name" type="text" caption="Фамилия"/>
+                    <entity id="a03_aviation_route_passenger_first_name" defMap="a03_aviation_route_passenger"
+                            column="first_name" type="text" caption="Имя"/>
+                    <entity id="a03_aviation_route_passenger_middle_name" defMap="a03_aviation_route_passenger"
+                            column="middle_name" type="text" caption="Отчество"/>
+                    <entity id="a03_aviation_route_passenger_document_info" defMap="a03_aviation_route_passenger"
+                            column="document_info" type="text" caption="Документ"/>
+                    <entity id="a03_aviation_route_passenger_description" defMap="a03_aviation_route_passenger"
+                            column="description" type="text" caption="Описание"/>
+                    <entity id="a03_aviation_route_passenger_dtime" defMap="a03_aviation_route_passenger" column="dtime"
+                            type="text" caption="Время"/>
+                </entity>
+            </entity>
+        </entity>
+    </entity>
+
+    <!-- #### -->
+</level2>

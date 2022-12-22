@@ -1,0 +1,640 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<level1 xmlns="ru.next.schema.lvl1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="ru.next.schema.lvl1 level1.xsd">
+
+    <!-- Классы по имени похожи с 0 уровня но это не они, это абстрактный слой который разворачивает БД. Пример это диагноз МкБ 10
+    в одной таблице несколько ссылок на этот справочник и join будет по нескольким полям из базовой таблицы-->
+
+    <tableAlias id="ce" ref="CALL_EVENT" key="id"/>
+    <tableAlias id="ct" ref="VW_SC_CALL_TECH_TECHNIKA" key="id">
+        <restriction disable="false" expression="OR(IS_NULL(ct.TECH_DELETED),EQ(ct.TECH_DELETED, 0))"
+                     id="rest_ct_no_deleted"/>
+    </tableAlias>
+
+    <tableAlias id="ct_sent_type" ref="TECH_SEND_TYPE" key="id"/>
+
+    <tableAlias id="ct_b" ref="VW_SC_CALL_TECH_BRIGADE" key="id">
+        <restriction disable="false" expression="OR(IS_NULL(ct_b.TECH_DELETED),EQ(ct_b.TECH_DELETED, 0))"
+                     id="rest_ct_b_no_deleted"/>
+    </tableAlias>
+
+    <tableAlias id="ct_sent_type_b" ref="TECH_SEND_TYPE" key="id"/>
+
+    <tableAlias id="apa" ref="ARM03_PATIENT_ASSISTANCE" key="id"/>
+    <tableAlias id="arm03_call" ref="ARM03_CALL" key="id_call"/>
+
+    <tableAlias id="icd10_foms" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="ref_call_event_sound" ref="REF_CALL_EVENT_SOUND" key="id"/>
+
+    <tableAlias id="icd10_foms_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_foms_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <!-- Вобщем случии сдесь у нас должно быть древовидная структура ссылок экземпляров таблиц -->
+    <reference columnA="ID" columnB="ID" tableA="ce" tableB="apa"/>
+    <!-- Нужно внемательно смотреть за списком таблиц, и всегда изходить из того что данные связи по умолчанию означают
+      LEFT JOIN если есть единое поле ID то использовать слева таблицу которая ближе к CALL_EVENT-->
+    <reference columnA="ID" columnB="ID_CALL" tableA="apa" tableB="arm03_call"/>
+    <reference columnA="id_extra_diagnosis_icd10" columnB="id" tableA="apa" tableB="icd10_foms"/>
+
+    <reference tableA="icd10_foms" columnA="id_block" tableB="icd10_foms_block" columnB="id"/>
+    <reference tableA="icd10_foms_block" columnA="id_class" tableB="icd10_foms_class" columnB="id"/>
+
+    <reference columnA="ID" columnB="ID_CALL" tableA="ce" tableB="ct" relationshipEntityType="ONE_TO_MANY"/>
+    <reference columnA="ID" columnB="ID_CALL" tableA="ce" tableB="ct_b" relationshipEntityType="ONE_TO_MANY"/>
+    <reference tableA="ct" columnA="ID_SEND_TYPE" tableB="ct_sent_type" columnB="id"/>
+    <reference tableA="ct_b" columnA="ID_SEND_TYPE" tableB="ct_sent_type_b" columnB="id"/>
+
+    <reference tableA="ce" columnA="id" tableB="ref_call_event_sound" columnB="ID_CALL_EVENT"
+               relationshipEntityType="ONE_TO_MANY"/>
+
+
+    <tableAlias id="ce_full_adress" ref="FULL_ADRESS" key="id"/>
+    <tableAlias id="ce_base_adress" ref="BASE_ADRESS" key="id"/>
+    <tableAlias id="ce_city" ref="CITY" key="id"/>
+    <tableAlias id="ce_street" ref="STREET" key="id"/>
+    <tableAlias id="ce_ar" ref="CITY_AREA" key="id"/>
+
+    <reference columnA="ID_CITY" columnB="ID" tableA="ce_base_adress" tableB="ce_city"/>
+    <reference tableA="ce_city" columnA="id_city_area" tableB="ce_ar" columnB="id"/>
+    <reference columnA="ID_STREET" columnB="ID" tableA="ce_base_adress" tableB="ce_street"/>
+    <reference columnA="ID_BASE_ADRESS" columnB="ID" tableA="ce_full_adress" tableB="ce_base_adress"/>
+    <reference columnA="ID_FULL_ADRESS" columnB="ID" tableA="ce" tableB="ce_full_adress"/>
+
+    <tableAlias id="ce_base_adress_src" ref="BASE_ADRESS" key="id"/>
+    <tableAlias id="ce_city_src" ref="CITY" key="id"/>
+    <tableAlias id="ce_street_src" ref="STREET" key="id"/>
+    <reference columnA="ID_CITY" columnB="ID" tableA="ce_base_adress_src" tableB="ce_city_src"/>
+    <reference columnA="ID_STREET" columnB="ID" tableA="ce_base_adress_src" tableB="ce_street_src"/>
+    <tableAlias id="ce_rank" ref="RANK" key="id"/>
+    <tableAlias id="ce_event_type" ref="EVENT_TYPE" key="id"/>
+    <reference columnA="ID_RANK" columnB="ID" tableA="ce" tableB="ce_rank"/>
+    <reference columnA="EVENT_TYPE_ID" columnB="ID" tableA="ce_rank" tableB="ce_event_type"/>
+    <reference columnA="ID_SRC_ADDRESS" columnB="ID" tableA="ce" tableB="ce_base_adress_src"/>
+    <!-- только техника -->
+    <tableAlias id="ct_technika" ref="TECHNIKA" key="id"/>
+
+    <!-- только бригады -->
+    <tableAlias id="ct_brigade" ref="TECHNIKA" key="id"/>
+
+    <reference columnA="ID_TECH" columnB="ID" tableA="ct" tableB="ct_technika"/>
+    <reference columnA="ID_TECH" columnB="ID" tableA="ct_b" tableB="ct_brigade"/>
+
+    <tableAlias id="ct_technika_cn" ref="CALL_NAME" key="id">
+        <restriction id="ct_technika_cn_res0" disable="false"
+                     expression="EQ(ct_technika_cn.TABLE_NAME, 'TECHNIKA')"/>
+    </tableAlias>
+
+    <reference columnA="ID" columnB="ID_TBL" tableA="ct_technika" tableB="ct_technika_cn"/>
+
+    <tableAlias id="ct_brigade_cn" ref="CALL_NAME" key="id">
+        <restriction id="ct_brigade_cn_res0" disable="false"
+                     expression="EQ(ct_brigade_cn.TABLE_NAME, 'TECHNIKA')"/>
+    </tableAlias>
+
+    <reference columnA="ID" columnB="ID_TBL" tableA="ct_brigade" tableB="ct_brigade_cn"/>
+
+    <tableAlias id="ct_brigade_pult" ref="PULT" key="id"/>
+    <tableAlias id="ct_technika_pult" ref="PULT" key="id"/>
+
+    <reference tableA="ct_brigade" columnA="ID_PULT" tableB="ct_brigade_pult" columnB="ID"/>
+    <reference tableA="ct_brigade" columnA="ID_PULT" tableB="ct_technika_pult" columnB="ID"/>
+
+    <tableAlias id="a03_move_method" ref="ARM03_MOVE_METHOD" key="id"/>
+    <reference tableA="apa" columnA="ID_MOVE_METHOD" tableB="a03_move_method" columnB="id"/>
+
+    <!-- 000000000000000000000000000000000000000000000000 -->
+
+    <tableAlias id="src_et" ref="SRC_EVENT_TYPE" key="id"/>
+
+
+    <tableAlias id="rank" ref="RANK" key="id"/>
+    <tableAlias id="event_type" ref="EVENT_TYPE" key="id"/>
+    <tableAlias id="ref_call_event_sound_aon" ref="REF_CALL_EVENT_SOUND" key="id">
+        <!-- TODO этого условия здесь не достатончо, что будет если несколько входящих было прикреплено к карточке... -->
+        <restriction id="ref_call_event_sound_aon_res0" expression="EQ(ref_call_event_sound_aon.is_out,0)"/>
+    </tableAlias>
+    <tableAlias id="objects" ref="OBJECTS" key="id"/>
+    <tableAlias id="objects_fa" ref="FULL_ADRESS" key="id"/>
+    <tableAlias id="objects_ba" ref="BASE_ADRESS" key="id"/>
+    <tableAlias id="objects_ci" ref="CITY" key="id"/>
+    <tableAlias id="objects_st" ref="STREET" key="id"/>
+    <tableAlias id="objects_ar" ref="CITY_AREA" key="id"/>
+
+    <tableAlias id="informer_fa" ref="FULL_ADRESS" key="id"/>
+    <tableAlias id="informer_ba" ref="BASE_ADRESS" key="id"/>
+    <tableAlias id="informer_ci" ref="CITY" key="id"/>
+    <tableAlias id="informer_st" ref="STREET" key="id"/>
+    <tableAlias id="informer_ar" ref="CITY_AREA" key="id"/>
+
+    <tableAlias id="ca" ref="CALL_ACTION" key="id">
+        <restriction id="ca_res0" expression="AND(EQ(ca.action_deleted,0),IS_NULL(ca.ftype))"/>
+    </tableAlias>
+    <tableAlias id="ca_sp" ref="STANDART_PHRASES" key="id"/>
+
+    <tableAlias id="ca_d" ref="CALL_ACTION" key="id">
+        <restriction id="ca_d_res0" expression="AND(EQ(ca_d.action_deleted,0),EQ(ca_d.ftype,1))"/>
+    </tableAlias>
+    <tableAlias id="ca_d_sp" ref="STANDART_PHRASES" key="id"/>
+
+    <tableAlias id="patient" ref="ARM03_PATIENT" key="id"/>
+    <tableAlias id="patient_fa" ref="FULL_ADRESS" key="id"/>
+    <tableAlias id="patient_ba" ref="BASE_ADRESS" key="id"/>
+    <tableAlias id="patient_ci" ref="CITY" key="id"/>
+    <tableAlias id="patient_st" ref="STREET" key="id"/>
+    <tableAlias id="patient_ar" ref="CITY_AREA" key="id"/>
+    <tableAlias id="patient_doc_type" ref="document_type" key="id"/>
+    <tableAlias id="hc_help" ref="ARM03_HELP_CALL" key="id">
+        <restriction id="hc_help_res0" expression="EQ(hc_help.is_survey,0)"/>
+    </tableAlias>
+    <tableAlias id="hc_help_se" ref="ARM03_EASY_SERVICE" key="id"/>
+    <tableAlias id="hc_help_med" ref="ARM03_HELP_CALL_MED" key="id"/>
+    <tableAlias id="w_rfof_med_v2" ref="WAREHOUSE_RFOF_MEDICAMENT_V2" key="id"/>
+
+    <tableAlias id="hospital" ref="HOSPITAL" key="id"/>
+    <tableAlias id="hospital_type" ref="HOSPITAL_TYPE" key="id"/>
+    <tableAlias id="hospital_level" ref="HOSPITAL_LEVEL" key="id"/>
+    <reference tableA="hospital" columnA="id_hospital_level" tableB="hospital_level" columnB="id"/>
+
+    <tableAlias id="hospital_dt" ref="HOSPITAL" key="id"/>
+    <tableAlias id="hospital_dt_type" ref="HOSPITAL_TYPE" key="id"/>
+    <tableAlias id="hospital_dt_level" ref="HOSPITAL_LEVEL" key="id"/>
+    <reference tableA="arm03_call" columnA="id_hospital" tableB="hospital_dt" columnB="id"/>
+    <reference tableA="hospital_dt" columnA="id_hospital_level" tableB="hospital_dt_level" columnB="id"/>
+    <reference tableA="hospital_dt" columnA="ID_HOSPITAL_TYPE" tableB="hospital_dt_type" columnB="id"/>
+
+    <tableAlias id="hc_help_place" ref="arm03_call_help_place" key="id"/>
+    <reference tableA="hc_help" columnA="id_help_place" tableB="hc_help_place" columnB="id"/>
+
+    <tableAlias id="a03_acci_cause" ref="ARM03_ACCIDENT_CAUSE" key="id"/>
+    <tableAlias id="a03_depa_cause_res" ref="ARM03_DEPARTURE_CAUSE" key="id"/>
+    <tableAlias id="a03_depa_cause" ref="ARM03_DEPARTURE_CAUSE" key="id"/>
+
+    <tableAlias id="a03_depa_result" ref="ARM03_DEPARTURE_RESULT" key="id"/>
+
+    <tableAlias id="ct_br_tt" ref="TECH_TYPE" key="id"/>
+    <tableAlias id="ct_te_tt" ref="TECH_TYPE" key="id"/>
+
+    <tableAlias id="icd10_primary" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_primary_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_primary_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <tableAlias id="icd10_comp" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_comp_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_comp_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <tableAlias id="icd10_hos_dia" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_hos_dia_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_hos_dia_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+
+    <tableAlias id="icd10_acc" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_acc_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_acc_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <tableAlias id="icd10_icd" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_icd_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_icd_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <tableAlias id="icd10_ec" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_ec_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_ec_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <tableAlias id="icd10_final" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_final_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_final_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <tableAlias id="icd10_bcd" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_bcd_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_bcd_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+    <tableAlias id="icd10_ad" ref="ARM03_ICD_10" key="id"/>
+    <tableAlias id="icd10_ad_block" ref="ARM03_ICD_10_BLOCK" key="id"/>
+    <tableAlias id="icd10_ad_class" ref="ARM03_ICD_10_CLASS" key="id"/>
+
+
+    <tableAlias id="a03_stf_doctor" ref="STAFF_TBL" key="id"/>
+    <tableAlias id="a03_stf_doctor_appointment" ref="APPOINTMENT" key="id"/>
+    <tableAlias id="a03_stf_spec_tfoms" ref="ARM03_SPEC_TFOMS" key="id"/>
+    <reference tableA="a03_stf_doctor" columnA="ID_APPOINTMENT" tableB="a03_stf_doctor_appointment" columnB="id"/>
+    <reference tableA="a03_stf_doctor" columnA="ID_SPEC_TFOMS" tableB="a03_stf_spec_tfoms" columnB="id"/>
+
+    <tableAlias id="a03_place_deliv" ref="ARM03_PLACE_DELIVERY" key="id"/>
+
+    <tableAlias id="a03_cpr_dead_occured" ref="ARM03_CPR_DEAD_OCCURED" key="id"/>
+
+    <tableAlias id="ref_call_staff" ref="REF_CALL_STAFF" key="id_call"/>
+    <tableAlias id="rcs_staff" ref="STAFF_TBL" key="id"/>
+    <tableAlias id="rcs_staff_pult" ref="PULT" key="id"/>
+    <tableAlias id="rcs_stf_spec_tfoms" ref="ARM03_SPEC_TFOMS" key="id"/>
+    <tableAlias id="rcs_staff_appoin" ref="APPOINTMENT" key="id"/>
+
+    <reference tableA="rcs_staff" columnA="ID_SPEC_TFOMS" tableB="rcs_stf_spec_tfoms" columnB="id"/>
+    <reference tableA="rcs_staff" columnA="ID_PULT" tableB="rcs_staff_pult" columnB="id"/>
+
+    <tableAlias id="lpu_act" ref="HOSPITAL" key="id"/>
+    <tableAlias id="lpu_act_type" ref="HOSPITAL_TYPE" key="id"/>
+
+    <tableAlias id="a03_category_call" ref="ARM03_CATEGORY_CALL" key="id"/>
+    <tableAlias id="a03_category_call_res" ref="ARM03_CATEGORY_CALL" key="id"/>
+
+    <tableAlias id="a03_social_status" ref="ARM03_SOCIAL_STATUS" key="id"/>
+
+    <tableAlias id="a03_assistance_result" ref="ARM03_ASSISTANCE_RESULT" key="id"/>
+
+    <tableAlias id="a03_pat_registration_place_type" ref="ARM03_REGISTRATION_PLACE_TYPE" key="id"/>
+
+    <tableAlias id="apod" ref="ARM03_PATIENT_OBJECTIVE_DATA" key="id"/>
+    <tableAlias id="a03_overall_state" ref="ARM03_OVERALL_STATE" key="id"/>
+
+    <tableAlias id="a03_cpr_result" ref="ARM03_CPR_RESULT" key="id"/>
+
+    <tableAlias id="ce_direct_city" ref="CITY" key="id"/>
+
+    <tableAlias id="ce_direct_ar" ref="CITY_AREA" key="id"/>
+    <reference tableA="ce_direct_city" columnA="id_city_area" tableB="ce_direct_ar" columnB="id"/>
+
+    <tableAlias id="ce_direct_ar2" ref="CITY_AREA" key="id"/>
+    <reference tableA="ce" columnA="id_city_area" tableB="ce_direct_ar2" columnB="id"/>
+
+    <tableAlias id="a03_call_place" ref="CALL_PLACE" key="id"/>
+
+    <tableAlias id="a03_ist_fin" ref="ARM03_IST_FIN" key="id"/>
+
+    <tableAlias id="a03_cause_no_hospitalis" ref="ARM03_CAUSE_NO_HOSPITALIS" key="id"/>
+
+    <tableAlias id="user_ce_reg" ref="USERS" key="id"/>
+
+    <tableAlias id="a03_insurance_company" ref="ARM03_INSURANCE_COMPANY" key="id"/>
+
+    <tableAlias id="a03_cpr_cardiac_arrest" ref="ARM03_CPR_CARDIAC_ARREST" key="id"/>
+
+    <tableAlias id="h_bac_mat" ref="HOSPITAL" key="id"/>
+
+    <tableAlias id="vw_staff" ref="STAFF" key="id"/>
+
+    <tableAlias id="age_group_for_dic" ref="AGE_GROUP" key="id"/>
+
+    <tableAlias id="country_tree_coun" ref="COUNTRY_TREE" key="id"/>
+    <tableAlias id="country_tree_reg" ref="COUNTRY_TREE" key="id"/>
+
+
+    <reference tableA="ce" columnA="id_src_type" tableB="src_et" columnB="id"/>
+    <reference tableA="ce" columnA="ID_RANK" tableB="rank" columnB="id"/>
+    <reference tableA="ce" columnA="ID_EVENT_TYPE" tableB="event_type" columnB="id"/>
+    <reference tableA="ce" columnA="id" tableB="ref_call_event_sound_aon" columnB="ID_CALL_EVENT"/>
+
+    <reference tableA="ce" columnA="id_object" tableB="objects" columnB="id"/>
+    <reference tableA="objects" columnA="id_full_adress" tableB="objects_fa" columnB="id"/>
+    <reference tableA="objects_fa" columnA="id_base_adress" tableB="objects_ba" columnB="id"/>
+    <reference tableA="objects_ba" columnA="id_city" tableB="objects_ci" columnB="id"/>
+    <reference tableA="objects_ba" columnA="id_street" tableB="objects_st" columnB="id"/>
+    <reference tableA="objects_ci" columnA="id_city_area" tableB="objects_ar" columnB="id"/>
+
+    <reference tableA="ce" columnA="id_src_address" tableB="informer_ba" columnB="id"/>
+    <reference tableA="informer_ba" columnA="id_city" tableB="informer_ci" columnB="id"/>
+    <reference tableA="informer_ba" columnA="id_street" tableB="informer_st" columnB="id"/>
+    <reference tableA="informer_ci" columnA="id_city_area" tableB="informer_ar" columnB="id"/>
+
+    <reference tableA="ce" columnA="id" tableB="ca" columnB="id_call" relationshipEntityType="ONE_TO_MANY"/>
+    <reference tableA="ca" columnA="id_action" tableB="ca_sp" columnB="id"/>
+
+    <reference tableA="ce" columnA="id" tableB="ca_d" columnB="id_call" relationshipEntityType="ONE_TO_MANY"/>
+    <reference tableA="ca_d" columnA="id_action" tableB="ca_d_sp" columnB="id"/>
+
+    <reference tableA="arm03_call" columnA="id_patient" tableB="patient" columnB="id"/>
+    <reference tableA="patient" columnA="id_place_residence" tableB="patient_fa" columnB="id"/>
+    <reference tableA="patient_fa" columnA="id_base_adress" tableB="patient_ba" columnB="id"/>
+    <reference tableA="patient_ba" columnA="id_city" tableB="patient_ci" columnB="id"/>
+    <reference tableA="patient_ba" columnA="id_street" tableB="patient_st" columnB="id"/>
+    <reference tableA="patient_ci" columnA="id_city_area" tableB="patient_ar" columnB="id"/>
+    <reference tableA="ce" columnA="id" tableB="hc_help" columnB="id_call" relationshipEntityType="ONE_TO_MANY"/>
+    <reference tableA="hc_help" columnA="id_easy_service" tableB="hc_help_se" columnB="id"/>
+    <reference tableA="hc_help" columnA="id" tableB="hc_help_med" columnB="id_help_call"
+               relationshipEntityType="ONE_TO_MANY"/>
+    <reference tableA="hc_help_med" columnA="id_medicament" tableB="w_rfof_med_v2" columnB="id"/>
+    <reference tableA="apa" columnA="id_hospital" tableB="hospital" columnB="id"/>
+    <reference tableA="hospital" columnA="ID_HOSPITAL_TYPE" tableB="hospital_type" columnB="id"/>
+    <reference tableA="apa" columnA="ID_ACCIDENT_CAUSE" tableB="a03_acci_cause" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_RESULT_DEP_CAUSE" tableB="a03_depa_cause_res" columnB="id"/>
+    <reference tableA="apa" columnA="ID_DEPARTURE_CAUSE" tableB="a03_depa_cause" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_DEPARTURE_RESULT" tableB="a03_depa_result" columnB="id"/>
+
+    <reference tableA="ct" columnA="ID_TECH_TYPE" tableB="ct_te_tt" columnB="id"/>
+    <reference tableA="ct_b" columnA="ID_TECH_TYPE" tableB="ct_br_tt" columnB="id"/>
+
+    <reference tableA="apa" columnA="id_primary_icd10" tableB="icd10_primary" columnB="id"/>
+    <reference tableA="icd10_primary" columnA="id_block" tableB="icd10_primary_block" columnB="id"/>
+    <reference tableA="icd10_primary_block" columnA="id_class" tableB="icd10_primary_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="id_complication_icd10" tableB="icd10_comp" columnB="id"/>
+    <reference tableA="icd10_comp" columnA="id_block" tableB="icd10_comp_block" columnB="id"/>
+    <reference tableA="icd10_comp_block" columnA="id_class" tableB="icd10_comp_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_HOSPITAL_DIAGNOSIS_ICD10" tableB="icd10_hos_dia" columnB="id"/>
+    <reference tableA="icd10_hos_dia" columnA="id_block" tableB="icd10_hos_dia_block" columnB="id"/>
+    <reference tableA="icd10_hos_dia_block" columnA="id_class" tableB="icd10_hos_dia_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_ACCOMPANYING_ICD10" tableB="icd10_acc" columnB="id"/>
+    <reference tableA="icd10_acc" columnA="id_block" tableB="icd10_acc_block" columnB="id"/>
+    <reference tableA="icd10_acc_block" columnA="id_class" tableB="icd10_acc_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_immediate_cause_death_ICD10" tableB="icd10_icd" columnB="id"/>
+    <reference tableA="icd10_icd" columnA="id_block" tableB="icd10_icd_block" columnB="id"/>
+    <reference tableA="icd10_icd_block" columnA="id_class" tableB="icd10_icd_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="id_external_cause_icd10" tableB="icd10_ec" columnB="id"/>
+    <reference tableA="icd10_ec" columnA="id_block" tableB="icd10_ec_block" columnB="id"/>
+    <reference tableA="icd10_ec_block" columnA="id_class" tableB="icd10_ec_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="id_icd10_final" tableB="icd10_final" columnB="id"/>
+    <reference tableA="icd10_final" columnA="id_block" tableB="icd10_final_block" columnB="id"/>
+    <reference tableA="icd10_final_block" columnA="id_class" tableB="icd10_final_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="id_basic_cause_death_icd10" tableB="icd10_bcd" columnB="id"/>
+    <reference tableA="icd10_bcd" columnA="id_block" tableB="icd10_bcd_block" columnB="id"/>
+    <reference tableA="icd10_bcd_block" columnA="id_class" tableB="icd10_bcd_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="id_additional_diagnosis_icd10" tableB="icd10_ad" columnB="id"/>
+    <reference tableA="icd10_ad" columnA="id_block" tableB="icd10_ad_block" columnB="id"/>
+    <reference tableA="icd10_ad_block" columnA="id_class" tableB="icd10_ad_class" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_DOCTOR" tableB="a03_stf_doctor" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_PLACE_DELIVERY" tableB="a03_place_deliv" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_DEATH_OCCURRED" tableB="a03_cpr_dead_occured" columnB="id"/>
+
+    <reference tableA="ce" columnA="id" tableB="ref_call_staff" columnB="id_call" relationshipEntityType="ONE_TO_MANY"/>
+    <reference tableA="ref_call_staff" columnA="ID_STAFF" tableB="rcs_staff" columnB="id"/>
+    <reference tableA="rcs_staff" columnA="ID_APPOINTMENT" tableB="rcs_staff_appoin" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_ACT_CALL_HOSPITAL" tableB="lpu_act" columnB="id"/>
+    <reference tableA="lpu_act" columnA="ID_HOSPITAL_TYPE" tableB="lpu_act_type" columnB="id"/>
+
+    <reference tableA="arm03_call" columnA="ID_CATEG_CALL" tableB="a03_category_call" columnB="id"/>
+    <reference tableA="arm03_call" columnA="ID_CATEG_CALL_RESULT" tableB="a03_category_call_res" columnB="id"/>
+
+    <reference tableA="patient" columnA="ID_SOCIAL_STATUS" tableB="a03_social_status" columnB="id"/>
+    <reference tableA="patient" columnA="ID_DOCUMENT_TYPE" tableB="patient_doc_type" columnB="ID"/>
+    <reference tableA="apa" columnA="ID_ASSISTANCE_RESULT" tableB="a03_assistance_result" columnB="id"/>
+
+    <reference tableA="patient" columnA="ID_REGISTRATION_PLACE_TYPE" tableB="a03_pat_registration_place_type"
+               columnB="id"/>
+
+    <reference tableA="apa" columnA="id" tableB="apod" columnB="id"/>
+    <reference tableA="apod" columnA="ID_OVERALL_STATE" tableB="a03_overall_state" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_RESULT_CPR" tableB="a03_cpr_result" columnB="id"/>
+
+    <reference tableA="ce" columnA="id_city" tableB="ce_direct_city" columnB="id"/>
+
+    <reference tableA="arm03_call" columnA="ID_CALL_PLACE" tableB="a03_call_place" columnB="ID"/>
+
+    <reference tableA="apa" columnA="ID_IST_FIN" tableB="a03_ist_fin" columnB="id"/>
+
+    <reference tableA="apa" columnA="id_cause_no_hospitalis" tableB="a03_cause_no_hospitalis" columnB="id"/>
+
+    <reference tableA="ce" columnA="oper_reg" tableB="user_ce_reg" columnB="id"/>
+
+    <reference tableA="patient" columnA="ID_INSURANCE_COMPANY" tableB="a03_insurance_company" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_CARDIAC_ARREST" tableB="a03_cpr_cardiac_arrest" columnB="id"/>
+
+    <reference tableA="apa" columnA="ID_MO_TAKEN_BAC_MATERIAL" tableB="h_bac_mat" columnB="id"/>
+
+    <tableAlias id="pult_take_call" ref="PULT" key="id"/>
+
+    <tableAlias id="vw_sc_repair_id_pult" ref="VW_SC_REPAIR_ID_PULT" key="id"/>
+
+    <reference tableA="ce" columnA="ID" tableB="vw_sc_repair_id_pult" columnB="ID">
+    </reference>
+
+    <reference tableA="vw_sc_repair_id_pult" columnA="ID_PULT" tableB="pult_take_call" columnB="id">
+    </reference>
+
+    <tableAlias id="vw_sc_repair_own_pult" ref="VW_SC_REPAIR_OWN_PULT" key="id"/>
+
+    <reference tableA="ce" columnA="ID" tableB="vw_sc_repair_own_pult" columnB="ID">
+    </reference>
+
+    <tableAlias id="vw_sc_mob_device_use" ref="VW_SC_MOB_DEVICE_USE" key="id"/>
+
+    <reference tableA="ce" columnA="ID" tableB="vw_sc_mob_device_use" columnB="ID">
+    </reference>
+
+    <tableAlias id="vw_sc_get_call" ref="VW_SC_GET_CALL" key="id"/>
+
+    <reference tableA="ce" columnA="ID" tableB="vw_sc_get_call" columnB="ID">
+    </reference>
+
+    <tableAlias id="pult_own_call" ref="PULT" key="id"/>
+
+    <reference tableA="vw_sc_repair_own_pult" columnA="id_own_pult" tableB="pult_own_call" columnB="id">
+    </reference>
+
+    <reference tableA="patient" columnA="ID_COUNTRY" tableB="country_tree_coun" columnB="id"/>
+
+    <reference tableA="patient" columnA="ID_TERRITORY_INSURES" tableB="country_tree_reg" columnB="id"/>
+    <!-- 000000000000000000000000000000000000000000000000 -->
+
+
+    <tableAlias id="arm03_vpolis" ref="ARM03_VPOLIS" key="id"/>
+    <reference tableA="patient" columnA="ID_VPOLIS" tableB="arm03_vpolis" columnB="id"/>
+
+    <tableAlias id="vw_sc_for_first_call_sign" ref="VW_SC_FOR_FIRST_CALL_SIGN" key="id"/>
+    <tableAlias id="vw_sc_for_follow_and_cont_sign" ref="VW_SC_FOR_FOLLOW_AND_CONT_SIGN" key="id"/>
+    <tableAlias id="vw_sc_for_linked_sign" ref="VW_SC_FOR_LINKED_SIGN" key="id"/>
+
+    <reference tableA="ce" columnA="id" tableB="vw_sc_for_first_call_sign" columnB="id"/>
+    <reference tableA="ce" columnA="id" tableB="vw_sc_for_follow_and_cont_sign" columnB="id"/>
+    <reference tableA="ce" columnA="id" tableB="vw_sc_for_linked_sign" columnB="id"/>
+
+    <tableAlias id="user_tex_b_send" ref="USERS" key="id"/>
+    <tableAlias id="user_tex_t_send" ref="USERS" key="id"/>
+    <tableAlias id="user_fill_dop_talon" ref="USERS" key="id"/>
+    <tableAlias id="user_retreat" ref="USERS" key="id"/>
+
+    <reference tableA="ct_b" columnA="id_oper_send" tableB="user_tex_b_send" columnB="id"/>
+    <reference tableA="ct" columnA="id_oper_send" tableB="user_tex_t_send" columnB="id"/>
+    <reference tableA="arm03_call" columnA="ID_OPER_KTS_FILL" tableB="user_fill_dop_talon" columnB="id"/>
+    <reference tableA="ce" columnA="ID_USER_RETREAT" tableB="user_retreat" columnB="id"/>
+
+    <tableAlias id="arm03_departure_delay_cause" ref="ARM03_DEPARTURE_DELAY_CAUSE" key="id"/>
+    <reference tableA="apa" columnA="id_departure_delay_cause" tableB="arm03_departure_delay_cause" columnB="id"/>
+
+    <tableAlias id="vw_sc_help_list_usl" ref="VW_SC_HELP_LIST_USL" key="id"/>
+    <reference tableA="ce" columnA="id" tableB="vw_sc_help_list_usl" columnB="id"/>
+
+    <tableAlias id="vw_sc_staff_list" ref="VW_SC_STAFF_LIST" key="id"/>
+    <reference tableA="ce" columnA="id" tableB="vw_sc_staff_list" columnB="id_call"/>
+
+    <tableAlias id="unified_call_info" ref="UNIFIED_CALL_INFO" key="id"/>
+    <reference tableA="ce" columnA="id" tableB="unified_call_info" columnB="id"/>
+
+
+    <tableAlias id="hc_obsl" ref="ARM03_HELP_CALL" key="id">
+        <restriction id="hc_obsl_res0" expression="EQ(hc_obsl.is_survey,1)"/>
+    </tableAlias>
+    <tableAlias id="hc_obsl_se" ref="ARM03_EASY_SERVICE" key="id"/>
+
+    <reference tableA="ce" columnA="id" tableB="hc_obsl" columnB="id_call" relationshipEntityType="ONE_TO_MANY"/>
+    <reference tableA="hc_obsl" columnA="id_easy_service" tableB="hc_obsl_se" columnB="id"/>
+
+    <tableAlias id="arm03_assistance_efficiency" ref="ARM03_ASSISTANCE_EFFICIENCY" key="id"/>
+    <reference tableA="apa" columnA="id_assistance_efficiency" tableB="arm03_assistance_efficiency" columnB="id"/>
+
+    <tableAlias id="isdB" ref="ARM03_PATIENT_INSTR_STUDY_DATA" key="id"/>
+    <tableAlias id="isdA" ref="ARM03_PATIENT_INSTR_STUDY_DATA" key="id"/>
+
+    <reference tableA="apod" columnA="id_instr_data_before" tableB="isdB" columnB="id"/>
+    <reference tableA="apod" columnA="id_instr_data_after" tableB="isdA" columnB="id"/>
+
+    <tableAlias id="dutys_brig" ref="DUTYS" key="id"/>
+    <tableAlias id="duty_shift_plan_brig" ref="DUTY_SHIFT_PLAN" key="id">
+    </tableAlias>
+    <tableAlias id="duty_shift_plan_root_brig" ref="DUTY_SHIFT_PLAN" key="id">
+        <restriction id="for_duty_shift_plan_root_brig"
+                     expression="AND(EQ(duty_shift_plan_root_brig.is_parent,1), EQ(duty_shift_plan_root_brig.is_deleted, 0))"/>
+    </tableAlias>
+
+    <reference tableA="ct_b" columnA="id_duty" tableB="dutys_brig" columnB="id"/>
+    <reference tableA="dutys_brig" columnA="id_shift_plan" tableB="duty_shift_plan_brig" columnB="id"/>
+    <reference tableA="duty_shift_plan_brig" columnA="id_duty_shift" tableB="duty_shift_plan_root_brig" columnB="id"/>
+
+    <tableAlias id="place_hospital_ref" ref="VW_SC_HOSPITAL_ADRESS" key="id_full_adress"/>
+    <tableAlias id="place_hospital" ref="HOSPITAL" key="id"/>
+    <tableAlias id="place_hospital_type" ref="HOSPITAL_TYPE" key="id"/>
+
+    <reference tableA="patient" columnA="ID_PLACE_RESIDENCE" tableB="place_hospital_ref" columnB="id_full_adress"/>
+    <reference tableA="place_hospital_ref" columnA="id_hospital" tableB="place_hospital" columnB="id"/>
+    <reference tableA="place_hospital" columnA="ID_HOSPITAL_TYPE" tableB="place_hospital_type" columnB="id"/>
+
+    <!-- ТЦМК -->
+
+    <tableAlias id="a03_cmc_accident" ref="ARM03_CMC_ACCIDENT" key="id_call"/>
+
+    <reference tableA="ce" columnA="id" tableB="a03_cmc_accident" columnB="id_call"/>
+
+    <tableAlias id="a03_cmc_patient_category" ref="ARM03_CMC_PATIENT_CATEGORY" key="id"/>
+
+    <reference tableA="a03_cmc_accident" columnA="id_patient_category" tableB="a03_cmc_patient_category" columnB="id"/>
+
+
+    <tableAlias id="a03_cmc_decision" ref="ARM03_CMC_DECISION" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_decision" tableB="a03_cmc_decision" columnB="id"/>
+
+    <tableAlias id="a03_cmc_responsible_org" ref="ARM03_CMC_RESPONSIBLE_ORG" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_responsible" tableB="a03_cmc_responsible_org" columnB="id"/>
+
+    <tableAlias id="a03_cmc_result" ref="ARM03_CMC_RESULT" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_result" tableB="a03_cmc_result" columnB="id"/>
+
+    <tableAlias id="a03_cmc_category" ref="ARM03_CMC_CATEGORY" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_category" tableB="a03_cmc_category" columnB="id"/>
+
+    <tableAlias id="a03_cmc_source_hospital" ref="HOSPITAL" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_source_hospital" tableB="a03_cmc_source_hospital" columnB="id"/>
+
+    <tableAlias id="a03_cmc_accepting_hospital" ref="HOSPITAL" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_accepting_hospital" tableB="a03_cmc_accepting_hospital"
+               columnB="id"/>
+
+    <tableAlias id="a03_cmc_accepting_hospital_type" ref="HOSPITAL_TYPE" key="id"/>
+    <reference tableA="a03_cmc_accepting_hospital" columnA="id_hospital_type" tableB="a03_cmc_accepting_hospital_type"
+               columnB="id"/>
+
+    <tableAlias id="a03_cmc_accepted_hospital" ref="HOSPITAL" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_accepted_hospital" tableB="a03_cmc_accepted_hospital"
+               columnB="id"/>
+
+    <tableAlias id="a03_cmc_evacuation_type" ref="arm03_cmc_evacuation_type" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_evacuation_type" tableB="a03_cmc_evacuation_type" columnB="id"/>
+
+    <tableAlias id="a03_cmc_aviation_task" ref="arm03_cmc_aviation_task" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_aviation_task" tableB="a03_cmc_aviation_task" columnB="id">
+    </reference>
+
+    <tableAlias id="cmc_aviation_company" ref="aviation_company" key="id"/>
+    <reference tableA="a03_cmc_aviation_task" columnA="id_company" tableB="cmc_aviation_company" columnB="id"/>
+
+    <tableAlias id="cmc_tech_type_avia" ref="tech_type" key="id"/>
+    <reference tableA="a03_cmc_aviation_task" columnA="id_tech_type" tableB="cmc_tech_type_avia" columnB="id"/>
+
+    <tableAlias id="user_cmc_aviation_task" ref="USERS" key="id"/>
+    <reference tableA="a03_cmc_aviation_task" columnA="id_user" tableB="user_cmc_aviation_task" columnB="id"/>
+
+    <tableAlias id="a03_aviation_task_route" ref="ARM03_AVIATION_TASK_ROUTE" key="id"/>
+    <reference tableA="a03_cmc_aviation_task" columnA="id" tableB="a03_aviation_task_route" columnB="id_task"
+               relationshipEntityType="ONE_TO_MANY"/>
+
+    <tableAlias id="user_cmc_aviation_task_route" ref="USERS" key="id"/>
+    <reference tableA="a03_aviation_task_route" columnA="id_user" tableB="user_cmc_aviation_task_route" columnB="id"/>
+
+    <tableAlias id="cmc_aviation_task_route_city_start" ref="CITY" key="id"/>
+    <tableAlias id="cmc_aviation_task_route_city_end" ref="CITY" key="id"/>
+
+    <reference tableA="a03_aviation_task_route" columnA="id_city_start" tableB="cmc_aviation_task_route_city_start"
+               columnB="id"/>
+    <reference tableA="a03_aviation_task_route" columnA="id_city_end" tableB="cmc_aviation_task_route_city_end"
+               columnB="id"/>
+
+    <tableAlias id="ref_aviation_route_passenger" ref="REF_AVIATION_ROUTE_PASSENGER" key="id_route"/>
+    <reference tableA="a03_aviation_task_route" columnA="id" tableB="ref_aviation_route_passenger" columnB="id_route"
+               relationshipEntityType="ONE_TO_MANY"/>
+
+    <tableAlias id="a03_aviation_route_passenger" ref="ARM03_AVIATION_ROUTE_PASSENGER" key="id"/>
+    <reference tableA="ref_aviation_route_passenger" columnA="id_passenger" tableB="a03_aviation_route_passenger"
+               columnB="id"/>
+
+    <tableAlias id="medical_profile" ref="MEDICAL_PROFILE" key="id"/>
+    <reference tableA="a03_cmc_accident" columnA="id_medical_profile" tableB="medical_profile" columnB="id"/>
+
+    <!-- #### -->
+
+    <tableAlias id="vw_sc_main_call" ref="VW_SC_MAIN_CALL" key="id"/>
+    <reference tableA="ce" columnA="id" tableB="vw_sc_main_call" columnB="id"/>
+
+    <tableAlias id="ce_ref_main" ref="CALL_EVENT" key="id"/>
+    <reference tableA="vw_sc_main_call" columnA="id_call" tableB="ce_ref_main" columnB="id"/>
+
+    <tableAlias id="dsp_send_ca" ref="vw_sc_disp_send" key="ID_CALL"/>
+    <reference tableA="ce" columnA="id" tableB="dsp_send_ca" columnB="ID_CALL"/>
+
+    <tableAlias id="dsp_send_ca_u" ref="USERS" key="id"/>
+    <reference tableA="dsp_send_ca" columnA="user_id" tableB="dsp_send_ca_u" columnB="id"/>
+
+    <tableAlias id="a03_category_patient" ref="ARM03_CATEGORY_PATIENT" key="id"/>
+    <reference tableA="patient" columnA="ID_CATEGORY_PATIENT" tableB="a03_category_patient" columnB="id"/>
+
+    <tableAlias id="a03_ev_hospital_sync_info" ref="ARM03_EV_HOSPITAL_SYNC_INFO" key="id_call"/>
+    <reference tableA="ce" columnA="id" tableB="a03_ev_hospital_sync_info" columnB="id_call"/>
+
+    <tableAlias id="ce_rere" ref="RETREAT_REASON" key="id"/>
+    <reference tableA="ce" columnA="retreat_reason" tableB="ce_rere" columnB="caption"/>
+
+    <!-- REF_PULT_EVENT -->
+    <tableAlias id="ref_pult_event" ref="REF_PULT_EVENT" key="id_call"/>
+    <reference tableA="ce" columnA="id" tableB="ref_pult_event" columnB="id_call"/>
+
+    <tableAlias id="rpe_pult" ref="PULT" key="id"/>
+    <reference tableA="ref_pult_event" columnA="server_cid" tableB="rpe_pult" columnB="id"/>
+
+    <tableAlias id="rpe_pult_scope" ref="PULT_SCOPE" key="id"/>
+    <reference tableA="rpe_pult" columnA="id_scope" tableB="rpe_pult_scope" columnB="id"/>
+
+    <!-- #### -->
+
+    <tableAlias id="ct_spec_brigade" ref="TECHNIKA" key="id"/>
+
+    <reference columnA="ID_SPEC_BRIGADE" columnB="ID" tableA="apa" tableB="ct_spec_brigade"/>
+
+    <tableAlias id="ct_spec_brigade_cn" ref="CALL_NAME" key="id">
+        <restriction id="ct_spec_brigade_cn_res0" disable="false"
+                     expression="EQ(ct_spec_brigade_cn.TABLE_NAME, 'TECHNIKA')"/>
+    </tableAlias>
+
+    <reference columnA="ID" columnB="ID_TBL" tableA="ct_spec_brigade" tableB="ct_spec_brigade_cn"/>
+
+</level1>
