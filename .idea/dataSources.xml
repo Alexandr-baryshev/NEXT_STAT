@@ -8,21 +8,21 @@
       <jdbc-url>jdbc:postgresql://10.22.1.94:54340/istok_main</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="VL@172.26.22.3" uuid="6284af28-bde4-4b93-bd6d-fbca90a902da">
+    <data-source source="LOCAL" name="pk_VL@172.26.22.3" uuid="6284af28-bde4-4b93-bd6d-fbca90a902da">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://10.22.1.94:54320/istok_main</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="USS@172.26.6.2" uuid="cebb1f5e-14b9-47d8-8cf3-bab74f9097bd">
+    <data-source source="LOCAL" name="pk_USS@172.26.6.2" uuid="cebb1f5e-14b9-47d8-8cf3-bab74f9097bd">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://10.22.1.94:54330/postgres_03</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="ARS@172.25.169.2" uuid="90247d6a-34c3-4b7b-b8f2-6c48b4fb2951">
+    <data-source source="LOCAL" name="pk_ARS@172.25.169.2" uuid="90247d6a-34c3-4b7b-b8f2-6c48b4fb2951">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
@@ -36,18 +36,39 @@
       <jdbc-url>jdbc:postgresql://10.22.1.2:5432/istok_main</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="Д_Горск@localhost" uuid="935bb342-b398-4c93-a073-97f71c809ccb">
+    <data-source source="LOCAL" name="pk_Д_Горск@localhost" uuid="935bb342-b398-4c93-a073-97f71c809ccb">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://10.22.1.94:54360/postgres_03</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="NHK@172.26.6.2" uuid="728be5c2-feb0-4195-b935-99499272de9f">
+    <data-source source="LOCAL" name="pk_NHK@172.26.6.2" uuid="728be5c2-feb0-4195-b935-99499272de9f">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://10.22.1.94:54380/postgres_03</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="pk_Д_Реч@172.26.2.2" uuid="6a2e4010-394f-487c-9b8a-b6c9935e774d">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://10.22.1.94:54390/postgres_03</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="pk_SPAS@172.26.5.2" uuid="9700775d-3543-4677-97a9-50e752e2c31b">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://10.22.1.94:54400/postgres_03</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
+    <data-source source="LOCAL" name="pk_LES@172.25.198.2" uuid="9d3f82b3-9ae2-4317-832f-aacd6a38a421">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://10.22.1.94:54370/istok_main</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>
