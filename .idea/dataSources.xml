@@ -36,7 +36,7 @@
       <jdbc-url>jdbc:postgresql://10.22.1.2:5432/istok_main</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="pk_Д_Горск@localhost" uuid="935bb342-b398-4c93-a073-97f71c809ccb">
+    <data-source source="LOCAL" name="pk_D_Gorsk@localhost" uuid="935bb342-b398-4c93-a073-97f71c809ccb">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
@@ -50,7 +50,7 @@
       <jdbc-url>jdbc:postgresql://10.22.1.94:54380/postgres_03</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
-    <data-source source="LOCAL" name="pk_Д_Реч@172.26.2.2" uuid="6a2e4010-394f-487c-9b8a-b6c9935e774d">
+    <data-source source="LOCAL" name="pk_D_Rech@172.26.2.2" uuid="6a2e4010-394f-487c-9b8a-b6c9935e774d">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
