@@ -1,4 +1,4 @@
-/*miac2*/
+/*miac2 - rest*/
 
 select
       'Владивосток'              as город,
