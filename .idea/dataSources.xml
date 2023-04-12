@@ -71,5 +71,12 @@
       <jdbc-url>jdbc:postgresql://10.22.1.94:54370/istok_main</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="hub_KSM@10.22.1.94" uuid="4fdd2d41-f2c3-41df-bba1-1aa2338eae33">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://10.22.1.94:54371/istok_main</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

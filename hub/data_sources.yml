@@ -1,0 +1,15 @@
+data_sources:
+  - name: Комсомольск
+    host: 172.20.105.2
+    user: postgres
+    pass: 27N$XTpgdb
+    db: istok_main
+
+  - name: новый
+    host: 0.0.0.0
+    user: user
+    pass: pass
+    db: db
+
+
+
