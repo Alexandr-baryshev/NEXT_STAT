@@ -5,11 +5,15 @@ data_sources:
     pass: 27N$XTpgdb
     db: istok_main
 
+  - name: Хабаровск
+    host1: root@172.20.70.190 | 2t0p0m3NEXT -> tunnel -> 192.168.0.120:5432 / 18500
+    host2: root@172.20.70.171 | XAB2t0p0m3 -> tunnel -> 192.168.0.120:5432
+    user: postgres
+    pass: postgres
+    db: istok_main
+
   - name: новый
     host: 0.0.0.0
     user: user
     pass: pass
     db: db
-
-
-
