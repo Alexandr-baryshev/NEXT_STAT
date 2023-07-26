@@ -1,0 +1,92 @@
+{
+  "columns": [
+    {
+      "id": "id_ce_ID_47a1de36-45f8-4228-913e-f4f5e2b4ec04",
+      "idField": "id_ce_ID",
+      "caption": "Идентификатор происшествия",
+      "alias": null,
+      "agg": null,
+      "columnSwitch": null
+    },
+    {
+      "id": "id_ce_REG_NO_0dfafe85-8036-43c7-83be-90b552f6fde0",
+      "idField": "id_ce_REG_NO",
+      "caption": "Регистрационный номер",
+      "alias": null,
+      "agg": null,
+      "columnSwitch": null
+    },
+    {
+      "id": "id_ce_CALL_NUMB_790411db-47e8-49b6-840e-8923a8a46604",
+      "idField": "id_ce_CALL_NUMB",
+      "caption": "Номер вызова",
+      "alias": null,
+      "agg": null,
+      "columnSwitch": null
+    },
+    {
+      "id": "id_ce_TIME_REG_436d4acc-7a54-4802-a3a0-79b0d68bc8a0",
+      "idField": "id_ce_TIME_REG",
+      "caption": "Время регистрации",
+      "alias": null,
+      "agg": null,
+      "columnSwitch": null
+    },
+    {
+      "id": "pult_take_call_d_e154e33f-5211-4bde-9672-48036c7a5110",
+      "idField": "pult_take_call_d",
+      "caption": "Район выезда",
+      "alias": null,
+      "agg": null,
+      "columnSwitch": null
+    }
+  ],
+  "condition": {
+    "property": null,
+    "description": null,
+    "id": "logic_a7ebcdf6-49f1-403a-a6bb-b75847f6fcba",
+    "type": "logic_and",
+    "conditions": [
+      {
+        "type": "SchemaQueryFieldCondition",
+        "property": null,
+        "description": null,
+        "id": "id_ce_CALL_NUMB_f38b03d0-06f2-43b2-87d9-325f2081245d",
+        "idField": "id_ce_CALL_NUMB",
+        "caption": "Номер вызова",
+        "type": "number",
+        "dictionary": null,
+        "action": null,
+        "value": [
+          {
+            "type": "gr",
+            "value": "0.0"
+          }
+        ]
+      }
+    ]
+  },
+  "fieldConditions": [
+    {
+      "property": null,
+      "description": null,
+      "id": "id_ce_TIME_REG_76f51240-9d9f-48d2-971d-7e27e0e62cca",
+      "idField": "id_ce_TIME_REG",
+      "caption": "Время регистрации",
+      "type": "dateTime",
+      "dictionary": null,
+      "action": null,
+      "value": [
+        {
+          "value": "2023-07-10T00:00:00",
+          "value1": "2023-07-12T00:00:00"
+        }
+      ]
+    }
+  ],
+  "type": "simple",
+  "distinct": false,
+  "name": null,
+  "limit": null,
+  "property": null
+}
